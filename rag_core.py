@@ -1,21 +1,23 @@
 import os
 import re
 import json
+import hashlib
+from copy import deepcopy
 from dataclasses import dataclass
 from typing import List, Dict, Tuple, Optional, Set
 
 from dotenv import load_dotenv
 from rank_bm25 import BM25Okapi
 
-from langchain_openai import ChatOpenAI, OpenAIEmbeddings
 from langchain_community.vectorstores import FAISS
 from langchain_core.documents import Document
+
+from llm_provider import get_chat_llm, get_embeddings
 
 load_dotenv()
 
 VECTOR_DB = os.getenv("VECTOR_DB", "vector_db")
 CORPUS_PATH = os.getenv("CORPUS_PATH", "data/corpus.jsonl")
-OPENAI_MODEL = os.getenv("OPENAI_MODEL", "gpt-4o-mini")
 
 VEC_FETCH_K = int(os.getenv("VEC_FETCH_K", "20"))
 VEC_K = int(os.getenv("VEC_K", "6"))
@@ -104,6 +106,21 @@ def classify_intent(q: str) -> str:
     for p in smalltalk_patterns:
         if re.search(p, ql):
             return "smalltalk"
+
+    policy_markers = [
+        "medicare", "medicaid", "cms",
+        "claim", "claims", "billing",
+        "cms-1500", "1500", "837p",
+        "timely filing", "filing deadline",
+        "prior authorization", "preauthorization",
+        "reimbursement", "payment",
+        "payer", "provider", "coverage",
+        "coding", "procedure code", "diagnosis code",
+        "appeal", "appeals", "appeal deadline",
+        "denial", "denials", "denied",
+    ]
+    if any(marker in ql for marker in policy_markers):
+        return "policy"
 
     medical_markers = [
         "symptom", "symptoms", "treatment", "treat", "therapy", "management",
@@ -195,10 +212,13 @@ def load_corpus_jsonl(path: str) -> List[Document]:
 def doc_key(d: Document) -> str:
     cid = d.metadata.get("chunk_id")
     if cid:
-        return cid
+        return str(cid)
     sf = d.metadata.get("source_file", "unknown.pdf")
     pg = d.metadata.get("page", "?")
-    return f"{sf}|{pg}|{abs(hash(d.page_content))}"
+    content_hash = hashlib.sha1(
+        (d.page_content or "").encode("utf-8")
+    ).hexdigest()
+    return f"{sf}|{pg}|{content_hash}"
 
 
 def rrf_fuse(vec_docs: List[Document], bm_docs: List[Document], k: int, rrf_k: int = 60) -> List[Document]:
@@ -220,6 +240,81 @@ def rrf_fuse(vec_docs: List[Document], bm_docs: List[Document], k: int, rrf_k: i
 # Strict disease filtering helpers
 def _normalize_filename(name: str) -> str:
     return (name or "").strip().lower()
+
+
+SECTION_KEYWORDS: Dict[str, List[str]] = {
+    "symptoms": ["symptom", "symptoms", "sign", "signs", "presentation"],
+    "causes": ["cause", "causes", "risk factor", "risk factors", "etiology"],
+    "treatment": ["treatment", "management", "therapy", "medication", "medicine"],
+    "diagnosis": ["diagnosis", "diagnose", "diagnostic", "screening", "test"],
+    "prevention": ["prevention", "prevent", "prophylaxis"],
+}
+
+
+def _clean_chunk_text(text: str) -> str:
+    text = re.sub(r"\s+", " ", (text or "").strip())
+    text = re.sub(r"^\d+\s+", "", text)
+    return text.strip()
+
+
+def _extract_bullet_lines(text: str, max_items: int = 5) -> List[str]:
+    text = _clean_chunk_text(text)
+    items = re.findall(r"(?:[•\-−])\s*([^•\-−]+?)(?=\s*[•\-−]|$)", text)
+    cleaned = [
+        item.strip(" .;")
+        for item in items
+        if 12 <= len(item.strip(" .;")) <= 220
+    ]
+    if cleaned:
+        return cleaned[:max_items]
+
+    sentences = [
+        s.strip()
+        for s in re.split(r"(?<=[.!?])\s+", text)
+        if len(s.strip()) >= 25
+    ]
+    return sentences[:max_items]
+
+
+def _infer_chunk_label(text: str, requested_sections: Set[str]) -> str:
+    text_lower = text.lower()
+    for section in requested_sections:
+        if section == "general":
+            continue
+        for keyword in SECTION_KEYWORDS.get(section, []):
+            if keyword in text_lower:
+                return section.replace("_", " ").title()
+    return "Guideline excerpt"
+
+
+def _rerank_docs_by_section(docs: List[Document], requested_sections: Set[str]) -> List[Document]:
+    keywords: List[str] = []
+    for section in requested_sections:
+        keywords.extend(SECTION_KEYWORDS.get(section, []))
+    if not keywords:
+        return docs
+
+    noise_markers = [
+        "annex",
+        "checklist",
+        "monitoring checklist",
+        "place a check",
+        "comments column",
+    ]
+
+    def score(doc: Document) -> int:
+        text = (doc.page_content or "").lower()
+        value = sum(2 for keyword in keywords if keyword in text)
+
+        if "symptoms" in requested_sections:
+            if "symptoms of" in text or "clinical features" in text:
+                value += 6
+            if any(marker in text for marker in noise_markers):
+                value -= 10
+
+        return value
+
+    return sorted(docs, key=score, reverse=True)
 
 
 def filter_docs_by_whitelist(docs: List[Document], target_disease: str) -> List[Document]:
@@ -251,10 +346,36 @@ class AnswerResult:
     sources: List[str]
     confidence: float
     normalized_query: str
+
+
+@dataclass
+class AnswerTrace:
+    answer: str
+    sources: List[str]
+    confidence: float
+    normalized_query: str
+    retrieved_docs: List[Document]
+
+
+def _copy_documents(docs: List[Document]) -> List[Document]:
+    """Return detached trace documents without mutating retriever-owned objects."""
+    copies: List[Document] = []
+    for doc in docs:
+        metadata = deepcopy(doc.metadata)
+        metadata.setdefault("chunk_id", doc_key(doc))
+        copies.append(
+            Document(
+                page_content=doc.page_content,
+                metadata=metadata,
+            )
+        )
+    return copies
+
+
 # Main service
 class MedicalRAG:
     def __init__(self):
-        self.embeddings = OpenAIEmbeddings()
+        self.embeddings = get_embeddings()
 
         self.vectorstore = FAISS.load_local(
             VECTOR_DB,
@@ -265,7 +386,7 @@ class MedicalRAG:
         self.corpus_docs = load_corpus_jsonl(CORPUS_PATH)
         self.bm25 = BM25Okapi([tokenize(d.page_content) for d in self.corpus_docs])
 
-        self.llm = ChatOpenAI(model=OPENAI_MODEL, temperature=0)
+        self.llm = get_chat_llm(temperature=0)
 
     # Retrieval
     def _vector_mmr_search(self, query: str) -> List[Document]:
@@ -429,13 +550,178 @@ Return in this format (include ONLY sections relevant to the user's question):
             sources.append(f"{source_file} ({page_str})")
         return sorted(set(sources))
 
-    # Answer generation 
+    def _generate_answer(
+        self,
+        prompt: str,
+        context: str,
+        normalized: str,
+        docs: List[Document],
+        requested_sections: Optional[Set[str]] = None,
+        allow_chunk_fallback: bool = True,
+    ) -> str:
+        response = self.llm.invoke(prompt)
+        answer = self._normalize_citation_format((response.content or "").strip())
+
+        # Retry any uncited response, including a premature abstention. Smaller
+        # local models sometimes miss evidence on the first pass.
+        if "[S" not in answer and docs:
+            retry_prompt = f"""Using ONLY the numbered sources below, answer the question directly and concisely.
+
+STRICT RULES:
+- Every factual statement MUST end with at least one valid citation such as [S1] or [S2].
+- Preserve material dates, quantities, exceptions, conditions, and scope.
+- Do not cite a source unless it supports the statement.
+- Do not add outside knowledge.
+- If the sources do not clearly answer the question, respond exactly: Not found in documents.
+
+Sources:
+{context}
+
+Question: {normalized}
+
+Answer:"""
+            response = self.llm.invoke(retry_prompt)
+            answer = self._normalize_citation_format((response.content or "").strip())
+
+        if (
+            allow_chunk_fallback
+            and answer != "Not found in documents."
+            and "[S" not in answer
+            and docs
+        ):
+            answer = self._fallback_cited_answer(docs, requested_sections)
+
+        return answer
+
+    def _fallback_policy_answer(
+        self,
+        query: str,
+        docs: List[Document],
+    ) -> str:
+        """Return a directly quoted policy sentence when generation abstains.
+
+        This fallback is deliberately extractive: it selects one source sentence
+        with strong lexical overlap and policy-requirement language. It never
+        assembles unrelated chunk fragments or adds outside facts.
+        """
+        query_text = query.lower().replace("-", " ")
+        query_tokens = set(tokenize(query_text))
+        if "timely filing" in query_text:
+            query_tokens.update(
+                {"file", "filed", "claims", "deadline", "limit", "months", "later"}
+            )
+        requirement_terms = {
+            "must", "required", "requirement", "requirements", "deadline",
+            "limit", "limits", "within", "later", "calendar", "months",
+            "days", "effective", "deny", "file", "filed", "filing",
+        }
+        candidates: List[Tuple[float, int, str]] = []
+
+        for source_index, doc in enumerate(docs, start=1):
+            text = re.sub(r"\s+", " ", (doc.page_content or "").strip())
+            sentences = re.split(r"(?<=[.!?])\s+", text)
+
+            for sentence in sentences:
+                sentence = sentence.strip()
+                if not 40 <= len(sentence) <= 600:
+                    continue
+
+                sentence_tokens = set(tokenize(sentence))
+                overlap = len(query_tokens & sentence_tokens)
+                requirement_overlap = len(requirement_terms & sentence_tokens)
+                has_specific_value = bool(re.search(r"\b\d+\b", sentence))
+
+                score = (3.0 * overlap) + requirement_overlap
+                if has_specific_value:
+                    score += 2.0
+                if "timely filing" in query_text and "timely filing" in sentence.lower():
+                    score += 5.0
+                if "timely filing" in query_text:
+                    has_general_deadline = (
+                        ("12 months" in sentence.lower() or "1 calendar year" in sentence.lower())
+                        and ("filed" in sentence.lower() or "filing" in sentence.lower())
+                    )
+                    if has_general_deadline:
+                        score += 20.0
+                if "time limit for filing all" in sentence.lower():
+                    score += 8.0
+                if "no later than" in sentence.lower() or "no more than" in sentence.lower():
+                    score += 3.0
+                if not any(term in query_text for term in ("exception", "extend", "retroactive")):
+                    if any(term in sentence.lower() for term in ("exception", "extend", "retroactive")):
+                        score -= 10.0
+
+                if overlap >= 2 and score >= 8:
+                    candidates.append((score, source_index, sentence))
+
+        if not candidates:
+            return "Not found in documents."
+
+        _, source_index, sentence = max(candidates, key=lambda item: item[0])
+        return f"{sentence} [S{source_index}]"
+
+    def _fallback_cited_answer(
+        self,
+        docs: List[Document],
+        requested_sections: Optional[Set[str]] = None,
+    ) -> str:
+        """Build a readable cited answer from retrieved chunks when the LLM omits citations."""
+        requested_sections = requested_sections or {"general"}
+        blocks: List[str] = []
+        seen_bullets: Set[str] = set()
+
+        for i, d in enumerate(docs[:4], start=1):
+            bullets = _extract_bullet_lines(d.page_content)
+            if not bullets:
+                continue
+
+            page = d.metadata.get("page")
+            page_str = f"page {page + 1}" if isinstance(page, int) else "unknown page"
+            label = _infer_chunk_label(d.page_content, requested_sections)
+
+            unique_bullets: List[str] = []
+            for bullet in bullets:
+                key = bullet.lower()[:80]
+                if key not in seen_bullets:
+                    seen_bullets.add(key)
+                    unique_bullets.append(bullet)
+
+            if not unique_bullets:
+                continue
+
+            lines = [f"#### {label} *({page_str})* [S{i}]"]
+            for bullet in unique_bullets[:4]:
+                lines.append(f"- {bullet}")
+            blocks.append("\n".join(lines))
+
+        if not blocks:
+            return "Not found in documents."
+
+        footer = (
+            "\n\n---\n"
+            "*This summary is drawn only from your uploaded guideline PDFs "
+            "and is not a substitute for professional medical advice.*"
+        )
+        return "### Summary from retrieved guidelines\n\n" + "\n\n".join(blocks) + footer
+
+    # Answer generation
     def answer(self, user_question: str) -> AnswerResult:
+        """Return the original public result shape for backward compatibility."""
+        trace = self.answer_with_trace(user_question)
+        return AnswerResult(
+            answer=trace.answer,
+            sources=trace.sources,
+            confidence=trace.confidence,
+            normalized_query=trace.normalized_query,
+        )
+
+    def answer_with_trace(self, user_question: str) -> AnswerTrace:
+        """Answer once and expose the exact documents supplied to generation."""
         normalized = normalize_query(user_question)
         intent = classify_intent(normalized)
 
         if intent == "greeting":
-            return AnswerResult(
+            return AnswerTrace(
                 answer=(
                     "Hello! I’m a Medical RAG assistant. "
                     "Ask a disease-related question"
@@ -444,10 +730,11 @@ Return in this format (include ONLY sections relevant to the user's question):
                 sources=[],
                 confidence=1.0,
                 normalized_query=normalized,
+                retrieved_docs=[],
             )
 
         if intent == "smalltalk":
-            return AnswerResult(
+            return AnswerTrace(
                 answer=(
                     "Yes — I can answer medical guideline questions . "
                     "Ask about symptoms, causes, treatment, diagnosis, or prevention of a disease."
@@ -455,10 +742,11 @@ Return in this format (include ONLY sections relevant to the user's question):
                 sources=[],
                 confidence=1.0,
                 normalized_query=normalized,
+                retrieved_docs=[],
             )
 
         if intent == "feedback":
-            return AnswerResult(
+            return AnswerTrace(
                 answer=(
                     "You are right — mistakes usually happen when retrieval pulls mixed documents, "
                     "or when the answer is not clearly present in the PDFs. "
@@ -468,10 +756,11 @@ Return in this format (include ONLY sections relevant to the user's question):
                 sources=[],
                 confidence=1.0,
                 normalized_query=normalized,
+                retrieved_docs=[],
             )
 
         if intent == "non_medical":
-            return AnswerResult(
+            return AnswerTrace(
                 answer=(
                     "I can only answer medical guideline questions from the provided PDFs. "
                     "Please ask a disease-related question (symptoms, causes, treatment, diagnosis, prevention)."
@@ -479,20 +768,25 @@ Return in this format (include ONLY sections relevant to the user's question):
                 sources=[],
                 confidence=0.8,
                 normalized_query=normalized,
+                retrieved_docs=[],
             )
 
-        # Medical query
+        # Healthcare document query
         target_disease = detect_target_disease(normalized)
         requested_sections = detect_requested_sections(normalized)
 
         docs, conf = self.hybrid_retrieve(normalized, target_disease=target_disease)
         if not docs:
-            return AnswerResult(
+            return AnswerTrace(
                 answer="Not found in documents.",
                 sources=[],
                 confidence=0.25,
                 normalized_query=normalized,
+                retrieved_docs=[],
             )
+
+        docs = _rerank_docs_by_section(docs, requested_sections)
+        trace_docs = _copy_documents(docs)
 
         context, _all_sources = self._build_context(docs)
         output_spec = self._build_output_spec(requested_sections)
@@ -500,7 +794,28 @@ Return in this format (include ONLY sections relevant to the user's question):
         # enforce whitelist if detected
         whitelist_files = DISEASE_FILE_WHITELIST.get(target_disease, []) if target_disease else []
 
-        prompt = f"""
+        if intent == "policy":
+            prompt = f"""
+You are a HEALTHCARE PAYMENT POLICY RESEARCH ASSISTANT.
+
+STRICT RULES:
+- Use ONLY the information in the provided policy Sources.
+- Do NOT add external knowledge or infer unstated requirements.
+- If the requested detail is not clearly supported, write exactly: Not found in documents.
+- Every factual statement MUST include citation(s) like [S1], [S2].
+- Preserve material dates, quantities, exceptions, conditions, and scope.
+- Do not cite sources that do not exist.
+
+Sources:
+{context}
+
+Question:
+{normalized}
+
+Answer concisely and cite every factual statement.
+"""
+        else:
+            prompt = f"""
 You are a PROFESSIONAL MEDICAL GUIDELINE ASSISTANT.
 
 STRICT RULES:
@@ -527,35 +842,48 @@ Important:
 - Add citations on each claim.
 - Do not cite sources that do not exist.
 """
-        response = self.llm.invoke(prompt)
-        answer = (response.content or "").strip()
-        answer = self._normalize_citation_format(answer)
+        answer = self._generate_answer(
+            prompt,
+            context,
+            normalized,
+            docs,
+            requested_sections,
+            allow_chunk_fallback=intent != "policy",
+        )
+
+        if intent == "policy" and (
+            answer == "Not found in documents." or "[S" not in answer
+        ):
+            answer = self._fallback_policy_answer(normalized, docs)
 
         # Not found, no sources
         if answer == "Not found in documents.":
-            return AnswerResult(
+            return AnswerTrace(
                 answer=answer,
                 sources=[],
                 confidence=min(conf, 0.4),
                 normalized_query=normalized,
+                retrieved_docs=trace_docs,
             )
 
         # Must have citations
         if "[S" not in answer:
-            return AnswerResult(
+            return AnswerTrace(
                 answer="Not found in documents.",
                 sources=[],
                 confidence=min(conf, 0.35),
                 normalized_query=normalized,
+                retrieved_docs=trace_docs,
             )
 
         cited_indices = self._extract_cited_indices(answer, len(docs))
         if not cited_indices:
-            return AnswerResult(
+            return AnswerTrace(
                 answer="Not found in documents.",
                 sources=[],
                 confidence=min(conf, 0.35),
                 normalized_query=normalized,
+                retrieved_docs=trace_docs,
             )
 
         # Only cited sources returned
@@ -568,16 +896,18 @@ Important:
                 bad = [s for s in cited_sources if _normalize_filename(s.split(" (page")[0]) not in allowed]
                 if bad:
                     # If citations point to wrong disease docs, reject answer
-                    return AnswerResult(
+                    return AnswerTrace(
                         answer="Not found in documents.",
                         sources=[],
                         confidence=0.3,
                         normalized_query=normalized,
+                        retrieved_docs=trace_docs,
                     )
 
-        return AnswerResult(
+        return AnswerTrace(
             answer=answer,
             sources=cited_sources,
             confidence=round(conf, 2),
             normalized_query=normalized,
+            retrieved_docs=trace_docs,
         )

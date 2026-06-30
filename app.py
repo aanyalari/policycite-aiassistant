@@ -27,12 +27,12 @@ if "messages" not in st.session_state:
 #Display chat history
 for msg in st.session_state.messages:
     with st.chat_message(msg["role"]):
-        st.write(msg["content"])
+        st.markdown(msg["content"])
 
         if msg.get("sources"):
             with st.expander("Sources (file + page)"):
                 for s in sorted(set(msg["sources"])):
-                    st.write(f"- {s}")
+                    st.markdown(f"- {s}")
 
 # User input
 query = st.chat_input("Ask a medical question...")
@@ -65,7 +65,7 @@ if query:
                 normalized_query = query
 
         # Answer
-        st.write(answer)
+        st.markdown(answer)
 
         # Query normalization hint
         if normalized_query.strip().lower() != query.strip().lower():
@@ -75,7 +75,7 @@ if query:
         if sources:
             with st.expander("Sources (file + page)"):
                 for s in sorted(set(sources)):
-                    st.write(f"- {s}")
+                    st.markdown(f"- {s}")
 
         
 

@@ -3,8 +3,9 @@ import json
 import hashlib
 from dotenv import load_dotenv
 from langchain_community.document_loaders import PyPDFLoader
-from langchain_openai import OpenAIEmbeddings
 from langchain_community.vectorstores import FAISS
+
+from llm_provider import get_embeddings
 
 # Compatibility across LangChain versions
 try:
@@ -81,7 +82,7 @@ def main():
             c.page_content
         )
 
-    embeddings = OpenAIEmbeddings()
+    embeddings = get_embeddings()
     vectorstore = FAISS.from_documents(chunks, embeddings)
 
     ensure_dir(VECTOR_DB)
