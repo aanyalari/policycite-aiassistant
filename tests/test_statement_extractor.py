@@ -201,6 +201,20 @@ Note: The provided sources do not mention a specific requirement.
         self.assertEqual(extract_statements("Hello! Please ask a question."), [])
         self.assertEqual(extract_statements(""), [])
 
+    def test_therefore_conclusion_is_cleaned_and_kept_for_attribution(self):
+        answer = (
+            "Therefore, the correct answer is: The Medicare timely filing "
+            "requirement is no longer as strict as it was before January 1, 2010."
+        )
+
+        self.assertEqual(
+            extract_statements(answer),
+            [
+                "The Medicare timely filing requirement is no longer as strict "
+                "as it was before January 1, 2010."
+            ],
+        )
+
 
 if __name__ == "__main__":
     unittest.main()

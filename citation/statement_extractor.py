@@ -46,7 +46,6 @@ _NON_FACTUAL_PREFIXES = (
     "i can help",
     "please ask",
     "based on the provided",
-    "therefore",
     "note:",
 )
 
@@ -75,6 +74,10 @@ def _clean_statement(value: Any) -> str:
     text = value.strip()
     text = re.sub(r"^\s*(?:[-*•]+|\d+[.)])\s*", "", text)
     text = re.sub(r"^#{1,6}\s*", "", text)
+    text = re.sub(r"^therefore,?\s*", "", text, flags=re.IGNORECASE)
+    text = re.sub(
+        r"^the correct answer is:\s*", "", text, flags=re.IGNORECASE
+    )
     text = _CITATION_RE.sub("", text)
     text = re.sub(r"\s+", " ", text).strip(" -*\t\r\n")
     return text
@@ -85,7 +88,7 @@ def _is_factual_candidate(text: str) -> bool:
         return False
 
     normalized = text.lower().strip(" .!?:")
-    if normalized in _NON_FACTUAL_EXACT:
+    if any(message in normalized for message in _NON_FACTUAL_EXACT):
         return False
     if normalized.startswith(_NON_FACTUAL_PREFIXES):
         return False

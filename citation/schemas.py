@@ -37,3 +37,16 @@ class CitedStatement(BaseModel):
     verdict: AttributionVerdict
     citations: List[EvidenceCitation] = Field(default_factory=list)
     reason: Optional[str] = None
+
+
+class CitationTrace(BaseModel):
+    """Public result returned by the end-to-end citation pipeline."""
+
+    question: str
+    answer: str
+    baseline_sources: List[str] = Field(default_factory=list)
+    generation_context_ids: List[str] = Field(default_factory=list)
+    statements: List[CitedStatement] = Field(default_factory=list)
+    citation_coverage: float = 0.0
+    needs_human_review: bool = False
+    latency_ms: Optional[float] = None
