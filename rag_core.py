@@ -221,7 +221,14 @@ def doc_key(d: Document) -> str:
     return f"{sf}|{pg}|{content_hash}"
 
 
-def rrf_fuse(vec_docs: List[Document], bm_docs: List[Document], k: int, rrf_k: int = 60) -> List[Document]:
+def rrf_fuse(
+    vec_docs: List[Document],
+    bm_docs: List[Document],
+    k: int,
+    rrf_k: int = 60,
+    *,
+    include_scores: bool = False,
+) -> List[Document]:
     scores: Dict[str, float] = {}
     doc_map: Dict[str, Document] = {}
 
@@ -236,7 +243,17 @@ def rrf_fuse(vec_docs: List[Document], bm_docs: List[Document], k: int, rrf_k: i
         scores[key] = scores.get(key, 0.0) + 1.0 / (rrf_k + rank)
 
     ranked = sorted(scores.items(), key=lambda x: x[1], reverse=True)
-    return [doc_map[key] for key, _ in ranked[:k]]
+    if not include_scores:
+        return [doc_map[key] for key, _ in ranked[:k]]
+
+    results: List[Document] = []
+    for key, score in ranked[:k]:
+        doc = doc_map[key]
+        metadata = deepcopy(doc.metadata)
+        metadata.setdefault("chunk_id", key)
+        metadata["retrieval_score"] = score
+        results.append(Document(page_content=doc.page_content, metadata=metadata))
+    return results
 # Strict disease filtering helpers
 def _normalize_filename(name: str) -> str:
     return (name or "").strip().lower()
