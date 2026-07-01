@@ -10,7 +10,7 @@ OLLAMA_CHAT_MODEL = os.getenv("OLLAMA_CHAT_MODEL", "llama3.2")
 OLLAMA_EMBED_MODEL = os.getenv("OLLAMA_EMBED_MODEL", "nomic-embed-text")
 OPENAI_MODEL = os.getenv("OPENAI_MODEL", "gpt-4o-mini")
 ATTRIBUTION_PROVIDER = os.getenv("ATTRIBUTION_PROVIDER", "ollama").lower()
-ATTRIBUTION_MODEL = os.getenv("ATTRIBUTION_MODEL", "llama3.1:8b")
+ATTRIBUTION_MODEL = os.getenv("ATTRIBUTION_MODEL", "qwen2.5:3b")
 
 
 def get_embeddings():

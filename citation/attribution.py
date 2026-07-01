@@ -1,5 +1,6 @@
 """Strict statement-level attribution against retrieved policy passages."""
 
+import re
 from typing import List
 
 from langchain_core.documents import Document
@@ -14,14 +15,9 @@ from .schemas import (
 )
 
 
-class _SelectedEvidence(BaseModel):
-    candidate_id: str
-    evidence_excerpt: str
-
-
 class _AttributionDecision(BaseModel):
     verdict: AttributionVerdict
-    selected_evidence: List[_SelectedEvidence] = Field(default_factory=list)
+    citation_ids: List[str] = Field(default_factory=list)
     reason: str = ""
 
 
@@ -31,9 +27,10 @@ the passages, considered together, support every material part of it. Dates,
 quantities, exclusions, modality, scope, and qualifiers are material. Missing,
 partial, irrelevant, or conflicting evidence means NOT_SUPPORTED.
 
-Select only candidate IDs supplied below. Evidence excerpts must be short,
-exact, contiguous text copied from their selected passages. Do not use external
-knowledge and do not invent source names, pages, IDs, or excerpts.
+For SUPPORTED, return every passage used in the top-level citation_ids list.
+For NOT_SUPPORTED, return an empty citation_ids list. Select only candidate IDs
+supplied below. Do not use external knowledge and do not invent source names,
+pages, or IDs.
 """
 
 
@@ -58,6 +55,25 @@ def _not_supported(statement: str, reason: str) -> CitedStatement:
         text=statement.strip(),
         verdict=AttributionVerdict.NOT_SUPPORTED,
         reason=reason,
+    )
+
+
+def _best_exact_excerpt(statement: str, passage: str) -> str:
+    """Select the most statement-relevant sentence without model-generated text."""
+    sentences = [
+        value.strip()
+        for value in re.split(r"(?<=[.!?])\s+", passage.strip())
+        if value.strip()
+    ]
+    if not sentences:
+        return passage.strip()
+
+    statement_tokens = set(re.findall(r"[a-z0-9]+", statement.lower()))
+    return max(
+        sentences,
+        key=lambda value: len(
+            statement_tokens & set(re.findall(r"[a-z0-9]+", value.lower()))
+        ),
     )
 
 
@@ -95,24 +111,19 @@ def judge_attribution(
     docs_by_id = {_candidate_id(doc): doc for doc in usable_docs}
     citations = []
     seen = set()
-    for selected in decision.selected_evidence:
-        doc = docs_by_id.get(selected.candidate_id)
-        excerpt = selected.evidence_excerpt.strip()
-        if (
-            doc is None
-            or not excerpt
-            or excerpt not in doc.page_content
-            or selected.candidate_id in seen
-        ):
+    for candidate_id in decision.citation_ids:
+        doc = docs_by_id.get(candidate_id)
+        if doc is None or candidate_id in seen:
             continue
-        seen.add(selected.candidate_id)
+        seen.add(candidate_id)
+        excerpt = _best_exact_excerpt(text, doc.page_content)
         metadata = doc.metadata
         internal_page = metadata.get("page")
         display_page = internal_page + 1 if isinstance(internal_page, int) else None
         source = metadata.get("source_file") or metadata.get("source") or ""
         citations.append(
             EvidenceCitation(
-                citation_id=selected.candidate_id,
+                citation_id=candidate_id,
                 source=str(source),
                 page=display_page,
                 evidence_excerpt=excerpt,

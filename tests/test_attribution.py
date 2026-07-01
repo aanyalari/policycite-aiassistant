@@ -46,15 +46,7 @@ class AttributionTests(unittest.TestCase):
             llm=_LLM(
                 {
                     "verdict": "SUPPORTED",
-                    "selected_evidence": [
-                        {
-                            "candidate_id": "candidate-1",
-                            "evidence_excerpt": (
-                                "Medicare claims must be filed no later than "
-                                "12 months after the date of service."
-                            ),
-                        }
-                    ],
+                    "citation_ids": ["candidate-1"],
                     "reason": "The passage states the filing limit.",
                 }
             ),
@@ -64,6 +56,11 @@ class AttributionTests(unittest.TestCase):
         self.assertEqual(result.citations[0].source, "filing.pdf")
         self.assertEqual(result.citations[0].page, 3)
         self.assertEqual(result.citations[0].retrieval_score, 0.75)
+        self.assertEqual(
+            result.citations[0].evidence_excerpt,
+            "Medicare claims must be filed no later than 12 months after "
+            "the date of service.",
+        )
 
     def test_unsupported_qualifier_is_not_supported(self):
         result = judge_attribution(
@@ -72,7 +69,7 @@ class AttributionTests(unittest.TestCase):
             llm=_LLM(
                 {
                     "verdict": "NOT_SUPPORTED",
-                    "selected_evidence": [],
+                    "citation_ids": [],
                     "reason": "The passage says exceptions may apply.",
                 }
             ),
@@ -94,12 +91,7 @@ class AttributionTests(unittest.TestCase):
             llm=_LLM(
                 {
                     "verdict": "SUPPORTED",
-                    "selected_evidence": [
-                        {
-                            "candidate_id": "invented-id",
-                            "evidence_excerpt": "Medicare claims must be filed",
-                        }
-                    ],
+                    "citation_ids": ["invented-id"],
                     "reason": "Supported.",
                 }
             ),
@@ -108,25 +100,21 @@ class AttributionTests(unittest.TestCase):
         self.assertEqual(result.verdict, AttributionVerdict.NOT_SUPPORTED)
         self.assertEqual(result.citations, [])
 
-    def test_non_exact_excerpt_is_rejected(self):
+    def test_excerpt_is_copied_from_passage_not_generated_by_model(self):
         result = judge_attribution(
             "Medicare claims must be filed within 12 months.",
             [_doc()],
             llm=_LLM(
                 {
                     "verdict": "SUPPORTED",
-                    "selected_evidence": [
-                        {
-                            "candidate_id": "candidate-1",
-                            "evidence_excerpt": "Claims always have a 12 month limit.",
-                        }
-                    ],
+                    "citation_ids": ["candidate-1"],
                     "reason": "Supported.",
                 }
             ),
         )
 
-        self.assertEqual(result.verdict, AttributionVerdict.NOT_SUPPORTED)
+        self.assertEqual(result.verdict, AttributionVerdict.SUPPORTED)
+        self.assertIn(result.citations[0].evidence_excerpt, _doc().page_content)
 
 
 if __name__ == "__main__":

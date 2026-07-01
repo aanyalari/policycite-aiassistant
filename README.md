@@ -125,6 +125,27 @@ The system retrieves relevant chunks from your **medical PDF guidelines**, then 
 - **pypdf**
 - **tiktoken**
 
+## Model Configuration
+
+Copy `.env.example` to `.env`. Answer generation and citation attribution use
+separate model settings:
+
+```dotenv
+OLLAMA_CHAT_MODEL=llama3.2:1b
+ATTRIBUTION_PROVIDER=ollama
+ATTRIBUTION_MODEL=qwen2.5:3b
+```
+
+`OLLAMA_CHAT_MODEL` generates the answer. The stronger
+`ATTRIBUTION_MODEL` independently judges whether the retrieved passages fully
+support each extracted statement. Install both local models before running the
+application:
+
+```bash
+ollama pull llama3.2:1b
+ollama pull qwen2.5:3b
+```
+
 ---
 
 ## How It Works
