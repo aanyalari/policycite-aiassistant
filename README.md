@@ -25,14 +25,7 @@ The project addresses Cotiviti's assessment topic **Content Management in
 Health Care**, especially billing and payment policy, traceability, and review
 controls for generated content.
 
-## What to look at first
-
-1. [app.py](./app.py) for the single live demo flow.
-2. [api.py](./api.py) for the baseline answer and PolicyCite audit endpoints.
-3. [evaluation/results/20260702T041034Z.json](./evaluation/results/20260702T041034Z.json) for the latest comparative run.
-4. [tests/](./tests) for the regression coverage.
-
-## Current build
+## Features
 
 - Local CMS policy corpus with FAISS dense retrieval, BM25 lexical retrieval,
   and Reciprocal Rank Fusion.
@@ -83,27 +76,6 @@ The primary inspiration is Wang et al. (2025), *MedCite: Can Language Models
 Generate Verifiable Text for Medicine?* PolicyCite-RAG adapts the paper's
 statement-level evaluation and post-generation retrieval ideas to public CMS
 payment-policy documents.
-
-This is not a full MedCite reproduction. It does not use PubMed-scale retrieval,
-BioASQ/PubMedQA, hierarchical BM25-to-MedCPT ranking, partial-support scoring,
-medical-expert annotation, multi-model ablations, or MedCite's complete
-double-pass citation-merging procedure.
-
-## Evaluation snapshot
-
-The latest comparative artifact is
-[`evaluation/results/20260702T041034Z.json`](./evaluation/results/20260702T041034Z.json).
-It records the same 10-question answer set for the baseline and PolicyCite
-audit path, along with preserved human labels and aggregate metrics.
-
-If you want the earlier failure trail, it is preserved separately:
-
-- `20260701T210613Z.json`: original schema-v1 failure run;
-- `20260701T223254Z-environment-failure.json`: blocked local-model trial; and
-- `20260701T223314Z-invalid-labeling.json`: invalidated labels preserved for
-  transparency; and
-- `20260701T232956Z-pre-cleanup-unscored.json`: completed execution superseded
-  by later answer-cleanup changes before labeling.
 
 ## Quick start
 
@@ -212,27 +184,3 @@ app.py                    Streamlit evidence interface
 rag_core.py               inherited RAG plus focused policy behavior
 ```
 
-## Notes
-
-- A citation establishes support in the loaded corpus, not universal truth or
-  policy currency.
-- The local 1B answer model can emit awkward, incomplete, or irrelevant text.
-- The attribution model can still make false-positive or false-negative calls.
-- PDF extraction can lose table and layout semantics.
-- Ten questions and three documents do not establish generalization.
-- The next research experiment should compare RRF with lexical-first,
-  semantic-second citation ranking, motivated by MedCite's retrieval ablation.
-- A second independent reviewer should label a subset and report agreement.
-- Production work would require effective-date metadata, access control,
-  monitoring, and a real reviewer workflow.
-- The preserved replay endpoint is still available for regression testing, but
-  it is not part of the main demo flow.
-
-## Baseline attribution and license
-
-This project builds on
-[mshoaib2006/medical-rag-ai-assistant](https://github.com/mshoaib2006/medical-rag-ai-assistant),
-distributed under the MIT License. The inherited baseline includes ingestion,
-hybrid retrieval, answer generation, FastAPI, Streamlit, and response-level
-sources. PolicyCite's new contribution is the citation-assurance and evaluation
-layer described above.
