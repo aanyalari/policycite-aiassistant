@@ -1,15 +1,15 @@
 # PolicyCite-RAG
 
-PolicyCite-RAG is an assessment-scale healthcare payment-policy assistant that
-tests whether statement-specific evidence retrieval can make RAG answers easier
-to verify. It extends an inherited medical RAG baseline with a citation-assurance
-layer inspired by MedCite.
+PolicyCite-RAG is a healthcare payment-policy assistant that adds
+statement-level evidence checks to a retrieval-augmented generation baseline.
+The project is built as a small, inspectable prototype for Cotiviti's
+assessment topic on content management in health care.
 
 > Research prototype only. It does not provide medical, legal, coding,
 > coverage, or reimbursement advice. Consequential use requires qualified
 > human review.
 
-## Why this project exists
+## What it does
 
 A response-level source list does not show which page supports each factual
 statement. PolicyCite-RAG preserves the baseline answer and its generation
@@ -22,22 +22,28 @@ sources, then separately:
 5. flags unsupported statements for review.
 
 The project addresses Cotiviti's assessment topic **Content Management in
-Health Care**, particularly billing and payment policy, policy summarization,
-traceability, and governance controls for generated content.
+Health Care**, especially billing and payment policy, traceability, and review
+controls for generated content.
 
-## What is implemented
+## What to look at first
+
+1. [app.py](./app.py) for the single live demo flow.
+2. [api.py](./api.py) for the baseline answer and PolicyCite audit endpoints.
+3. [evaluation/results/20260702T041034Z.json](./evaluation/results/20260702T041034Z.json) for the latest comparative run.
+4. [tests/](./tests) for the regression coverage.
+
+## Current build
 
 - Local CMS policy corpus with FAISS dense retrieval, BM25 lexical retrieval,
   and Reciprocal Rank Fusion.
-- Unchanged `/ask` endpoint for the inherited response-level baseline.
-- `/ask_cited` endpoint for statement-level citations and review flags.
+- Single live Streamlit demo that shows one baseline answer beside the current
+  PolicyCite audit.
+- `/ask` for the inherited response-level baseline.
+- `/ask_cited` for statement-level citations and review flags.
 - Exact generation-context trace, kept separate from post-generation evidence.
 - Binary `SUPPORTED` / `NOT_SUPPORTED` attribution.
 - Exact evidence excerpts copied from retrieved passages, never generated.
-- Streamlit evidence interface.
 - Ten-question frozen evaluation set with checkpoints and resumable runs.
-- Condition-specific review labels, scorer validation, counts, ratios, and
-  per-question traces.
 - Unit coverage for routing, extraction, retrieval, attribution, API behavior,
   evaluation, and provenance.
 
@@ -83,34 +89,14 @@ BioASQ/PubMedQA, hierarchical BM25-to-MedCPT ranking, partial-support scoring,
 medical-expert annotation, multi-model ablations, or MedCite's complete
 double-pass citation-merging procedure.
 
-## Current evaluation
+## Evaluation snapshot
 
-The current reportable artifact is
-`evaluation/results/20260701T231854Z-schema-v2-provenance-fixed.json`.
-Both conditions use the exact same generated answer; therefore answer
-correctness is a shared answer-quality check rather than an uplift claim.
+The latest comparative artifact is
+[`evaluation/results/20260702T041034Z.json`](./evaluation/results/20260702T041034Z.json).
+It records the same 10-question answer set for the baseline and PolicyCite
+audit path, along with preserved human labels and aggregate metrics.
 
-| Metric | Baseline sources | PolicyCite-RAG |
-| --- | ---: | ---: |
-| Citation coverage | 19/21 (90.5%) | 16/21 (76.2%) |
-| Citation precision | 32/43 (74.4%) | 18/18 (100.0%) |
-| Citation F1 | 81.7% | 86.5% |
-| Complete-answer retention | 7/10 (70.0%) | 7/10 (70.0%) |
-| Median latency | 6.55 s | 10.24 s |
-
-Median PolicyCite overhead was 3.69 seconds. On this small run, the stricter
-pipeline removed non-supporting attachments and achieved perfect audited
-precision, but it declined to cite five of 21 statements fully. The result is a
-precision-coverage tradeoff, not a universal performance win.
-
-The labels are a condition-specific evidence audit independent of the automated
-verdicts. The project author must complete the signoff recorded in
-`evaluation/LABELING_GUIDE.md` before using the results in a final submission.
-Answer-cleanup guardrails were added after this measured run; they are covered
-by regression tests but must be rebenchmarked when the local Ollama service is
-available. The table above does not claim to measure those later guardrails.
-
-Audit history is preserved:
+If you want the earlier failure trail, it is preserved separately:
 
 - `20260701T210613Z.json`: original schema-v1 failure run;
 - `20260701T223254Z-environment-failure.json`: blocked local-model trial; and
@@ -149,7 +135,7 @@ rebuild them:
 Start the API and UI in separate terminals:
 
 ```bash
-.venv/bin/uvicorn api:app --reload
+.venv/bin/uvicorn api:app --host 127.0.0.1 --port 8000
 .venv/bin/streamlit run app.py
 ```
 
@@ -167,34 +153,15 @@ curl -X POST http://127.0.0.1:8000/ask_cited \
   -d '{"question":"What is Medicare timely filing?"}'
 ```
 
-### Replay a genuine RAG failure
+### Live demo
 
-The Streamlit UI includes a `Replay genuine RAG failure` mode for the preserved
-`policy-003` answer in `evaluation/results/20260701T210613Z.json`. The answer was
-generated by this project's RAG model during that evaluation run and is not
-edited or regenerated for the replay. The current PolicyCite pipeline audits it
-live, supporting the correct 72-hour/seven-day statements and flagging the
-incorrect conclusion that both request types have seven days.
+The Streamlit app opens directly into one live comparison flow. It generates a
+baseline answer once, then sends that exact answer trace through the current
+PolicyCite audit. The screen stays intentionally simple:
 
-The fixed replay endpoint is also available directly:
-
-```bash
-curl -X POST http://127.0.0.1:8000/demo/replay/policy-003
-```
-
-This is a reproducible regression demonstration, not a claim that the current
-answer generator will reproduce the same historical error on demand.
-
-### Live original-baseline comparison
-
-The UI's `Live question` mode intentionally uses the frozen pre-correction RAG
-behavior: the original retrieval order, broader generation context, earlier
-policy prompt, and earlier fallback. It generates one answer and passes the exact
-same answer trace to the current PolicyCite pipeline. The left panel therefore
-shows the complete original baseline output, while the right panel shows only
-PolicyCite's statement-level audit. Current correction code remains available
-for evaluation and regression work; it is not silently presented as the
-baseline.
+- left panel: baseline answer and source list
+- right panel: statement-level evidence and supported / unsupported verdicts
+- no replay mode in the main UI
 
 ```bash
 curl -X POST http://127.0.0.1:8000/demo/live \
@@ -227,6 +194,9 @@ support.
 .venv/bin/python -m unittest discover -s tests -v
 ```
 
+The same test suite runs automatically in GitHub Actions on every push and pull
+request.
+
 ## Repository map
 
 ```text
@@ -242,7 +212,7 @@ app.py                    Streamlit evidence interface
 rag_core.py               inherited RAG plus focused policy behavior
 ```
 
-## Limitations and next experiments
+## Notes
 
 - A citation establishes support in the loaded corpus, not universal truth or
   policy currency.
@@ -255,6 +225,8 @@ rag_core.py               inherited RAG plus focused policy behavior
 - A second independent reviewer should label a subset and report agreement.
 - Production work would require effective-date metadata, access control,
   monitoring, and a real reviewer workflow.
+- The preserved replay endpoint is still available for regression testing, but
+  it is not part of the main demo flow.
 
 ## Baseline attribution and license
 
