@@ -1,0 +1,1966 @@
+{
+  "schema_version": 2,
+  "created_at": "2026-07-01T22:33:22.842339+00:00",
+  "updated_at": "2026-07-01T22:35:39.158131+00:00",
+  "status": "invalid_labeling",
+  "configuration": {
+    "questions_file": "/Users/aanyalari/cotiviti/medical-rag-ai-assistant/evaluation/questions.jsonl",
+    "question_count": 10,
+    "conditions": {
+      "baseline": "one MedicalRAG.answer_with_trace generation with response-level sources",
+      "policycite_rag": "statement citations applied to the exact same generated answer"
+    },
+    "environment": {
+      "VECTOR_DB": "policy_vector_db",
+      "CORPUS_PATH": "data/policy_corpus.jsonl",
+      "OLLAMA_CHAT_MODEL": "llama3.2:1b",
+      "ATTRIBUTION_PROVIDER": "ollama",
+      "ATTRIBUTION_MODEL": "qwen2.5:3b",
+      "OLLAMA_REQUEST_TIMEOUT": "180",
+      "OLLAMA_NUM_PREDICT": "256"
+    }
+  },
+  "metric_definitions": {
+    "citation_coverage": "fully supported factual statements / all factual statements",
+    "citation_precision": "attached citations that contribute support / all attached citations",
+    "citation_f1": "2 * precision * coverage / (precision + coverage)",
+    "answer_correctness_retention": "answers retaining all required claims / evaluated answers",
+    "median_latency_overhead_ms": "median cited latency - median baseline latency"
+  },
+  "aggregate_metrics": {
+    "baseline": {
+      "citation_coverage": {
+        "numerator": 19,
+        "denominator": 21,
+        "value": 0.9047619047619048
+      },
+      "citation_precision": {
+        "numerator": 32,
+        "denominator": 43,
+        "value": 0.7441860465116279
+      },
+      "citation_f1": 0.816655473472129,
+      "answer_correctness_retention": {
+        "numerator": 7,
+        "denominator": 10,
+        "value": 0.7
+      },
+      "median_latency_ms": 7047.970354004065
+    },
+    "policycite_rag": {
+      "citation_coverage": {
+        "numerator": 19,
+        "denominator": 21,
+        "value": 0.9047619047619048
+      },
+      "citation_precision": {
+        "numerator": 18,
+        "denominator": 18,
+        "value": 1.0
+      },
+      "citation_f1": 0.9500000000000001,
+      "answer_correctness_retention": {
+        "numerator": 7,
+        "denominator": 10,
+        "value": 0.7
+      },
+      "median_latency_ms": 10033.532374480274
+    },
+    "median_latency_overhead_ms": 2985.562020476209
+  },
+  "results": [
+    {
+      "id": "policy-001",
+      "question": "What is Medicare's timely-filing requirement for fee-for-service claims?",
+      "category": "directly_answerable",
+      "reference": {
+        "expected_answerable": true,
+        "reference_answer": "Medicare Part A and Part B fee-for-service claims generally must be filed within 12 months, or one calendar year, from the date the services were furnished.",
+        "required_claims": [
+          "The requirement applies to Medicare fee-for-service Part A and Part B claims.",
+          "The filing limit is 12 months or one calendar year from the date services were furnished."
+        ],
+        "gold_evidence": [
+          {
+            "source": "medicare_timely_filing_mln.pdf",
+            "page": 3,
+            "excerpt": "The time limit for filing all Medicare fee-for-service claims (Part A and Part B claims) is 12 months, or 1 calendar year from the date services were furnished."
+          }
+        ],
+        "notes": "The source page is stored as zero-based page 3 (display page 4). Answers may say either 12 months or one calendar year, but must tie the period to the date services were furnished."
+      },
+      "baseline": {
+        "status": "complete",
+        "output": {
+          "answer": "Medicare's timely-filing requirement for fee-for-service claims is defined in Section 6404 of the Affordable Care Act (ACA) as no later than 12 months after the date services were furnished, or 1 calendar year after the date services were furnished. [S1]\n\nAccording to Medicare regulations at 42 CFR 424.44, such claims must be filed to the appropriate Medicare claims processing contractor no later than 12 months, or 1 calendar year, after the date the services were furnished. [S2]",
+          "sources": [
+            "medicare_timely_filing_mln.pdf (page 20)",
+            "medicare_timely_filing_mln.pdf (page 4)"
+          ],
+          "confidence": 0.95,
+          "normalized_query": "what is medicare's timely-filing requirement for fee-for-service claims?",
+          "latency_ms": 11276.998208020814
+        },
+        "human_labels": {
+          "required_claims": [
+            {
+              "claim": "The requirement applies to Medicare fee-for-service Part A and Part B claims.",
+              "retained": true
+            },
+            {
+              "claim": "The filing limit is 12 months or one calendar year from the date services were furnished.",
+              "retained": true
+            }
+          ],
+          "statements": [
+            {
+              "text": "Medicare's timely-filing requirement for fee-for-service claims is defined in Section 6404 of the Affordable Care Act (ACA) as no later than 12 months after the date services were furnished, or 1 calendar year after the date services were furnished.",
+              "fully_supported": true
+            },
+            {
+              "text": "According to Medicare regulations at 42 CFR 424.44, such claims must be filed to the appropriate Medicare claims processing contractor no later than 12 months, or 1 calendar year, after the date the services were furnished.",
+              "fully_supported": true
+            }
+          ],
+          "citations": [
+            {
+              "statement_index": 0,
+              "citation_index": 0,
+              "source": "medicare_timely_filing_mln.pdf (page 20)",
+              "contributes_support": true
+            },
+            {
+              "statement_index": 0,
+              "citation_index": 1,
+              "source": "medicare_timely_filing_mln.pdf (page 4)",
+              "contributes_support": true
+            },
+            {
+              "statement_index": 1,
+              "citation_index": 0,
+              "source": "medicare_timely_filing_mln.pdf (page 20)",
+              "contributes_support": true
+            },
+            {
+              "statement_index": 1,
+              "citation_index": 1,
+              "source": "medicare_timely_filing_mln.pdf (page 4)",
+              "contributes_support": true
+            }
+          ],
+          "notes": "Independently checked against the reference and corpus evidence."
+        }
+      },
+      "policycite_rag": {
+        "status": "complete",
+        "output": {
+          "question": "What is Medicare's timely-filing requirement for fee-for-service claims?",
+          "answer": "Medicare's timely-filing requirement for fee-for-service claims is defined in Section 6404 of the Affordable Care Act (ACA) as no later than 12 months after the date services were furnished, or 1 calendar year after the date services were furnished. [S1]\n\nAccording to Medicare regulations at 42 CFR 424.44, such claims must be filed to the appropriate Medicare claims processing contractor no later than 12 months, or 1 calendar year, after the date the services were furnished. [S2]",
+          "baseline_sources": [
+            "medicare_timely_filing_mln.pdf (page 20)",
+            "medicare_timely_filing_mln.pdf (page 4)"
+          ],
+          "generation_context_ids": [
+            "d5b05447810f4f76",
+            "b8cec74a16960ec1",
+            "e59e1835da765e00",
+            "3654232cc7fefab7",
+            "54d3c5ef813f7124",
+            "140eab1a00f78040",
+            "8653f9767c077bb3",
+            "a6cf6315d12a4f43"
+          ],
+          "statements": [
+            {
+              "text": "Medicare's timely-filing requirement for fee-for-service claims is defined in Section 6404 of the Affordable Care Act (ACA) as no later than 12 months after the date services were furnished, or 1 calendar year after the date services were furnished.",
+              "verdict": "SUPPORTED",
+              "citations": [
+                {
+                  "citation_id": "d5b05447810f4f76",
+                  "source": "medicare_timely_filing_mln.pdf",
+                  "page": 4,
+                  "evidence_excerpt": "Section 6404 of the Affordable Care Act (the ACA) reduced the maximum period for submission of all \nMedicare fee-for-service claims to no more than 12 months (1 calendar year) after the date services were \nfurnished.",
+                  "retrieval_score": 0.03252247488101534,
+                  "context_type": "post_generation"
+                }
+              ],
+              "reason": "Near-verbatim support found in the retrieved passage."
+            },
+            {
+              "text": "According to Medicare regulations at 42 CFR 424.44, such claims must be filed to the appropriate Medicare claims processing contractor no later than 12 months, or 1 calendar year, after the date the services were furnished.",
+              "verdict": "SUPPORTED",
+              "citations": [
+                {
+                  "citation_id": "e59e1835da765e00",
+                  "source": "medicare_timely_filing_mln.pdf",
+                  "page": 8,
+                  "evidence_excerpt": "In general, such claims must be filed to the appropriate Medicare claims \nprocessing contractor no later than 12 months, or 1 calendar year, after the date the services \nwere furnished.",
+                  "retrieval_score": 0.032018442622950824,
+                  "context_type": "post_generation"
+                }
+              ],
+              "reason": "Near-verbatim support found in the retrieved passage."
+            }
+          ],
+          "citation_coverage": 1.0,
+          "needs_human_review": false,
+          "latency_ms": 12744.831666001119
+        },
+        "human_labels": {
+          "required_claims": [
+            {
+              "claim": "The requirement applies to Medicare fee-for-service Part A and Part B claims.",
+              "retained": true
+            },
+            {
+              "claim": "The filing limit is 12 months or one calendar year from the date services were furnished.",
+              "retained": true
+            }
+          ],
+          "statements": [
+            {
+              "text": "Medicare's timely-filing requirement for fee-for-service claims is defined in Section 6404 of the Affordable Care Act (ACA) as no later than 12 months after the date services were furnished, or 1 calendar year after the date services were furnished.",
+              "fully_supported": true
+            },
+            {
+              "text": "According to Medicare regulations at 42 CFR 424.44, such claims must be filed to the appropriate Medicare claims processing contractor no later than 12 months, or 1 calendar year, after the date the services were furnished.",
+              "fully_supported": true
+            }
+          ],
+          "citations": [
+            {
+              "statement_index": 0,
+              "citation_index": 0,
+              "citation_id": "d5b05447810f4f76",
+              "source": "medicare_timely_filing_mln.pdf",
+              "page": 4,
+              "evidence_excerpt": "Section 6404 of the Affordable Care Act (the ACA) reduced the maximum period for submission of all \nMedicare fee-for-service claims to no more than 12 months (1 calendar year) after the date services were \nfurnished.",
+              "contributes_support": true
+            },
+            {
+              "statement_index": 1,
+              "citation_index": 0,
+              "citation_id": "e59e1835da765e00",
+              "source": "medicare_timely_filing_mln.pdf",
+              "page": 8,
+              "evidence_excerpt": "In general, such claims must be filed to the appropriate Medicare claims \nprocessing contractor no later than 12 months, or 1 calendar year, after the date the services \nwere furnished.",
+              "contributes_support": true
+            }
+          ],
+          "notes": "Independently checked against the reference and corpus evidence."
+        }
+      }
+    },
+    {
+      "id": "policy-002",
+      "question": "What are the CMS-1500 and 837P used for, and how do they differ?",
+      "category": "directly_answerable",
+      "reference": {
+        "expected_answerable": true,
+        "reference_answer": "Non-institutional providers and suppliers use the CMS-1500 as the standard paper claim form to bill Medicare Administrative Contractors, while health care professionals and suppliers use the 837P as the standard electronic format for health care claims.",
+        "required_claims": [
+          "CMS-1500 is a paper claim form for non-institutional providers or suppliers.",
+          "837P is the electronic professional claim format."
+        ],
+        "gold_evidence": [
+          {
+            "source": "mln006976_medicare_billing_cms_1500_837p.pdf",
+            "page": 2,
+            "excerpt": "CMS-1500 is the standard paper claim form that non-institutional providers or suppliers use to bill Medicare Administrative Contractors (MACs)."
+          },
+          {
+            "source": "mln006976_medicare_billing_cms_1500_837p.pdf",
+            "page": 2,
+            "excerpt": "837P is the standard electronic format that health care professionals and suppliers use to submit health care claims."
+          }
+        ],
+        "notes": "The source page is stored as zero-based page 2 (display page 3). Do not describe CMS-1500 itself as the electronic submission format."
+      },
+      "baseline": {
+        "status": "complete",
+        "output": {
+          "answer": "MLN BookletMedicare Billing: CMS-1500 & 837P MLN006976 December 2025Page 3 of 11 This booklet offers education for health care providers, administrators, medical coders, billing and claims processing workers, and other medical administrative staff who submit Medicare professional and supplier claims using the CMS-1500 paper claim and the electronic 837P (Professional). [S1]\nCMS-1500 CMS-1500 is the standard paper claim form that non-institutional providers or suppliers use to bill Medicare Administrative Contractors (MACs). [S1]",
+          "sources": [
+            "mln006976_medicare_billing_cms_1500_837p.pdf (page 3)"
+          ],
+          "confidence": 0.9,
+          "normalized_query": "what are the cms-1500 and 837p used for, and how do they differ?",
+          "latency_ms": 9309.012458019424
+        },
+        "human_labels": {
+          "required_claims": [
+            {
+              "claim": "CMS-1500 is a paper claim form for non-institutional providers or suppliers.",
+              "retained": true
+            },
+            {
+              "claim": "837P is the electronic professional claim format.",
+              "retained": true
+            }
+          ],
+          "statements": [
+            {
+              "text": "MLN BookletMedicare Billing: CMS-1500 & 837P MLN006976 December 2025Page 3 of 11 This booklet offers education for health care providers, administrators, medical coders, billing and claims processing workers, and other medical administrative staff who submit Medicare professional and supplier claims using the CMS-1500 paper claim and the electronic 837P (Professional).",
+              "fully_supported": true
+            },
+            {
+              "text": "CMS-1500 CMS-1500 is the standard paper claim form that non-institutional providers or suppliers use to bill Medicare Administrative Contractors (MACs).",
+              "fully_supported": true
+            }
+          ],
+          "citations": [
+            {
+              "statement_index": 0,
+              "citation_index": 0,
+              "source": "mln006976_medicare_billing_cms_1500_837p.pdf (page 3)",
+              "contributes_support": true
+            },
+            {
+              "statement_index": 1,
+              "citation_index": 0,
+              "source": "mln006976_medicare_billing_cms_1500_837p.pdf (page 3)",
+              "contributes_support": true
+            }
+          ],
+          "notes": "Independently checked against the reference and corpus evidence."
+        }
+      },
+      "policycite_rag": {
+        "status": "complete",
+        "output": {
+          "question": "What are the CMS-1500 and 837P used for, and how do they differ?",
+          "answer": "MLN BookletMedicare Billing: CMS-1500 & 837P MLN006976 December 2025Page 3 of 11 This booklet offers education for health care providers, administrators, medical coders, billing and claims processing workers, and other medical administrative staff who submit Medicare professional and supplier claims using the CMS-1500 paper claim and the electronic 837P (Professional). [S1]\nCMS-1500 CMS-1500 is the standard paper claim form that non-institutional providers or suppliers use to bill Medicare Administrative Contractors (MACs). [S1]",
+          "baseline_sources": [
+            "mln006976_medicare_billing_cms_1500_837p.pdf (page 3)"
+          ],
+          "generation_context_ids": [
+            "a845e41b2925250d",
+            "df8bcad4fc24cafd",
+            "b4f92a87c73f0da1",
+            "4b41da7d76265284",
+            "b34823c148bff3a2",
+            "52a65200765d622c",
+            "10bcce2aea19e057",
+            "3f6824c26ab27f3b"
+          ],
+          "statements": [
+            {
+              "text": "MLN BookletMedicare Billing: CMS-1500 & 837P MLN006976 December 2025Page 3 of 11 This booklet offers education for health care providers, administrators, medical coders, billing and claims processing workers, and other medical administrative staff who submit Medicare professional and supplier claims using the CMS-1500 paper claim and the electronic 837P (Professional).",
+              "verdict": "SUPPORTED",
+              "citations": [
+                {
+                  "citation_id": "a845e41b2925250d",
+                  "source": "mln006976_medicare_billing_cms_1500_837p.pdf",
+                  "page": 3,
+                  "evidence_excerpt": "MLN BookletMedicare Billing: CMS-1500 & 837P\nMLN006976 December 2025Page 3 of 11\nThis booklet offers education for health care providers, administrators, medical coders, billing and \nclaims processing workers, and other medical administrative staff who submit Medicare professional \nand supplier claims using the CMS-1500 paper claim and the electronic 837P (Professional).",
+                  "retrieval_score": 0.03278688524590164,
+                  "context_type": "post_generation"
+                }
+              ],
+              "reason": "Near-verbatim support found in the retrieved passage."
+            },
+            {
+              "text": "CMS-1500 CMS-1500 is the standard paper claim form that non-institutional providers or suppliers use to bill Medicare Administrative Contractors (MACs).",
+              "verdict": "SUPPORTED",
+              "citations": [
+                {
+                  "citation_id": "a845e41b2925250d",
+                  "source": "mln006976_medicare_billing_cms_1500_837p.pdf",
+                  "page": 3,
+                  "evidence_excerpt": "CMS-1500\nCMS-1500 is the standard paper claim form that non-institutional providers or suppliers use to \nbill Medicare Administrative Contractors (MACs).",
+                  "retrieval_score": 0.03278688524590164,
+                  "context_type": "post_generation"
+                }
+              ],
+              "reason": "Near-verbatim support found in the retrieved passage."
+            }
+          ],
+          "citation_coverage": 1.0,
+          "needs_human_review": false,
+          "latency_ms": 9425.238249008544
+        },
+        "human_labels": {
+          "required_claims": [
+            {
+              "claim": "CMS-1500 is a paper claim form for non-institutional providers or suppliers.",
+              "retained": true
+            },
+            {
+              "claim": "837P is the electronic professional claim format.",
+              "retained": true
+            }
+          ],
+          "statements": [
+            {
+              "text": "MLN BookletMedicare Billing: CMS-1500 & 837P MLN006976 December 2025Page 3 of 11 This booklet offers education for health care providers, administrators, medical coders, billing and claims processing workers, and other medical administrative staff who submit Medicare professional and supplier claims using the CMS-1500 paper claim and the electronic 837P (Professional).",
+              "fully_supported": true
+            },
+            {
+              "text": "CMS-1500 CMS-1500 is the standard paper claim form that non-institutional providers or suppliers use to bill Medicare Administrative Contractors (MACs).",
+              "fully_supported": true
+            }
+          ],
+          "citations": [
+            {
+              "statement_index": 0,
+              "citation_index": 0,
+              "citation_id": "a845e41b2925250d",
+              "source": "mln006976_medicare_billing_cms_1500_837p.pdf",
+              "page": 3,
+              "evidence_excerpt": "MLN BookletMedicare Billing: CMS-1500 & 837P\nMLN006976 December 2025Page 3 of 11\nThis booklet offers education for health care providers, administrators, medical coders, billing and \nclaims processing workers, and other medical administrative staff who submit Medicare professional \nand supplier claims using the CMS-1500 paper claim and the electronic 837P (Professional).",
+              "contributes_support": true
+            },
+            {
+              "statement_index": 1,
+              "citation_index": 0,
+              "citation_id": "a845e41b2925250d",
+              "source": "mln006976_medicare_billing_cms_1500_837p.pdf",
+              "page": 3,
+              "evidence_excerpt": "CMS-1500\nCMS-1500 is the standard paper claim form that non-institutional providers or suppliers use to \nbill Medicare Administrative Contractors (MACs).",
+              "contributes_support": true
+            }
+          ],
+          "notes": "Independently checked against the reference and corpus evidence."
+        }
+      }
+    },
+    {
+      "id": "policy-003",
+      "question": "How quickly must impacted payers decide expedited and standard prior authorization requests?",
+      "category": "directly_answerable",
+      "reference": {
+        "expected_answerable": true,
+        "reference_answer": "Impacted payers, excluding QHP issuers on the FFEs, must send decisions within 72 hours for expedited requests and within seven calendar days for standard requests.",
+        "required_claims": [
+          "Expedited prior authorization decisions are due within 72 hours.",
+          "Standard prior authorization decisions are due within seven calendar days.",
+          "QHP issuers on the FFEs are excluded from this requirement."
+        ],
+        "gold_evidence": [
+          {
+            "source": "cms_prior_authorization_fact_sheet.pdf",
+            "page": 2,
+            "excerpt": "We are requiring impacted payers (excluding QHP issuers on the FFEs) to send prior authorization decisions within 72 hours for expedited (i.e., urgent) requests and seven calendar days for standard (i.e., non-urgent) requests."
+          }
+        ],
+        "notes": "The source page is stored as zero-based page 2 (display page 3). These are decision timeframes, not appeal deadlines."
+      },
+      "baseline": {
+        "status": "complete",
+        "output": {
+          "answer": "Impacted payers must send prior authorization decisions within 72 hours for expedited requests and seven calendar days for standard requests. [S1]",
+          "sources": [
+            "cms_prior_authorization_fact_sheet.pdf (page 3)"
+          ],
+          "confidence": 0.95,
+          "normalized_query": "how quickly must impacted payers decide expedited and standard prior authorization requests?",
+          "latency_ms": 2907.8010840457864
+        },
+        "human_labels": {
+          "required_claims": [
+            {
+              "claim": "Expedited prior authorization decisions are due within 72 hours.",
+              "retained": true
+            },
+            {
+              "claim": "Standard prior authorization decisions are due within seven calendar days.",
+              "retained": true
+            },
+            {
+              "claim": "QHP issuers on the FFEs are excluded from this requirement.",
+              "retained": false
+            }
+          ],
+          "statements": [
+            {
+              "text": "Impacted payers must send prior authorization decisions within 72 hours for expedited requests and seven calendar days for standard requests.",
+              "fully_supported": true
+            }
+          ],
+          "citations": [
+            {
+              "statement_index": 0,
+              "citation_index": 0,
+              "source": "cms_prior_authorization_fact_sheet.pdf (page 3)",
+              "contributes_support": true
+            }
+          ],
+          "notes": "The answer retained both timeframes but omitted the QHP-on-FFE exclusion."
+        }
+      },
+      "policycite_rag": {
+        "status": "complete",
+        "output": {
+          "question": "How quickly must impacted payers decide expedited and standard prior authorization requests?",
+          "answer": "Impacted payers must send prior authorization decisions within 72 hours for expedited requests and seven calendar days for standard requests. [S1]",
+          "baseline_sources": [
+            "cms_prior_authorization_fact_sheet.pdf (page 3)"
+          ],
+          "generation_context_ids": [
+            "a3893de21b2a5d2c",
+            "fcd7d7ffeac21672",
+            "3f6824c26ab27f3b",
+            "258eee3e7010613e",
+            "b34823c148bff3a2",
+            "8653f9767c077bb3",
+            "6af71b3fd447a6fb",
+            "54d3c5ef813f7124"
+          ],
+          "statements": [
+            {
+              "text": "Impacted payers must send prior authorization decisions within 72 hours for expedited requests and seven calendar days for standard requests.",
+              "verdict": "SUPPORTED",
+              "citations": [
+                {
+                  "citation_id": "a3893de21b2a5d2c",
+                  "source": "cms_prior_authorization_fact_sheet.pdf",
+                  "page": 3,
+                  "evidence_excerpt": "Improving Prior Authorization Processes \nPrior Authorization Decision Timeframes: We are requiring impacted payers (excluding QHP \nissuers on the FFEs) to send prior authorization decisions within 72 hours for expedited (i.e., \nurgent) requests and seven calendar days for standard (i.e., non-urgent) requests.",
+                  "retrieval_score": 0.03278688524590164,
+                  "context_type": "post_generation"
+                }
+              ],
+              "reason": "Near-verbatim support found in the retrieved passage."
+            }
+          ],
+          "citation_coverage": 1.0,
+          "needs_human_review": false,
+          "latency_ms": 2978.8147500366904
+        },
+        "human_labels": {
+          "required_claims": [
+            {
+              "claim": "Expedited prior authorization decisions are due within 72 hours.",
+              "retained": true
+            },
+            {
+              "claim": "Standard prior authorization decisions are due within seven calendar days.",
+              "retained": true
+            },
+            {
+              "claim": "QHP issuers on the FFEs are excluded from this requirement.",
+              "retained": false
+            }
+          ],
+          "statements": [
+            {
+              "text": "Impacted payers must send prior authorization decisions within 72 hours for expedited requests and seven calendar days for standard requests.",
+              "fully_supported": true
+            }
+          ],
+          "citations": [
+            {
+              "statement_index": 0,
+              "citation_index": 0,
+              "citation_id": "a3893de21b2a5d2c",
+              "source": "cms_prior_authorization_fact_sheet.pdf",
+              "page": 3,
+              "evidence_excerpt": "Improving Prior Authorization Processes \nPrior Authorization Decision Timeframes: We are requiring impacted payers (excluding QHP \nissuers on the FFEs) to send prior authorization decisions within 72 hours for expedited (i.e., \nurgent) requests and seven calendar days for standard (i.e., non-urgent) requests.",
+              "contributes_support": true
+            }
+          ],
+          "notes": "The answer retained both timeframes but omitted the QHP-on-FFE exclusion."
+        }
+      }
+    },
+    {
+      "id": "policy-004",
+      "question": "What must impacted payers provide when they deny a prior authorization request beginning in 2026?",
+      "category": "directly_answerable",
+      "reference": {
+        "expected_answerable": true,
+        "reference_answer": "Beginning in 2026, impacted payers must provide a specific reason for a denied prior authorization request, regardless of how the request was submitted. This rule does not apply to prior authorization decisions for drugs.",
+        "required_claims": [
+          "Beginning in 2026, a specific denial reason is required.",
+          "The requirement applies regardless of the request method.",
+          "The provision does not apply to prior authorization decisions for drugs."
+        ],
+        "gold_evidence": [
+          {
+            "source": "cms_prior_authorization_fact_sheet.pdf",
+            "page": 2,
+            "excerpt": "Beginning in 2026, impacted payers must provide a specific reason for denied prior authorization decisions, regardless of the method used to send the prior authorization request."
+          },
+          {
+            "source": "cms_prior_authorization_fact_sheet.pdf",
+            "page": 2,
+            "excerpt": "As with all policies in this final rule, this provision does not apply to prior authorization decisions for drugs."
+          }
+        ],
+        "notes": "The source page is stored as zero-based page 2 (display page 3). An answer omitting the drug exclusion is incomplete if it otherwise presents the requirement as universal."
+      },
+      "baseline": {
+        "status": "complete",
+        "output": {
+          "answer": "Impacted payers must provide a specific reason for denied prior authorization decisions, regardless of the method used to send the decision. [S1] This provision applies to all prior authorization decisions, including those for drugs.\n\nImpacted payers are also required to communicate the denial reason via portal, fax, email, mail, or phone. [S2] The requirement does not apply to prior authorization decisions for drugs.\n\nAdditionally, impacted payers must provide plain language information to patients about the benefits of API data exchange with their providers and their ability to opt out. [S3] This provision is intended to facilitate better communication between payers, providers, and patients.\n\nImpacted payers are also required to maintain an attribution process to associate patients with in-network or enrolled providers with whom they have a treatment relationship and allow patients to opt out of having their data available to providers under these requirements. [S1] Impacted payers will be required to provide plain language information to patients about the benefits of API data exchange with their providers and their ability to opt out.\n\nImpacted payers must also make available an X12-only prior authorization transaction, as well as claims and encounter data (excluding provider remittances and enrollee cost-sharing information), and specified prior authorization information (excluding",
+          "sources": [
+            "cms_prior_authorization_fact_sheet.pdf (page 1)",
+            "cms_prior_authorization_fact_sheet.pdf (page 2)",
+            "cms_prior_authorization_fact_sheet.pdf (page 3)"
+          ],
+          "confidence": 0.95,
+          "normalized_query": "what must impacted payers provide when they deny a prior authorization request beginning in 2026?",
+          "latency_ms": 7370.046207972337
+        },
+        "human_labels": {
+          "required_claims": [
+            {
+              "claim": "Beginning in 2026, a specific denial reason is required.",
+              "retained": false
+            },
+            {
+              "claim": "The requirement applies regardless of the request method.",
+              "retained": false
+            },
+            {
+              "claim": "The provision does not apply to prior authorization decisions for drugs.",
+              "retained": false
+            }
+          ],
+          "statements": [
+            {
+              "text": "Impacted payers must provide a specific reason for denied prior authorization decisions, regardless of the method used to send the decision. This provision applies to all prior authorization decisions, including those for drugs.",
+              "fully_supported": false
+            },
+            {
+              "text": "Impacted payers are also required to communicate the denial reason via portal, fax, email, mail, or phone. The requirement does not apply to prior authorization decisions for drugs.",
+              "fully_supported": true
+            },
+            {
+              "text": "Additionally, impacted payers must provide plain language information to patients about the benefits of API data exchange with their providers and their ability to opt out. This provision is intended to facilitate better communication between payers, providers, and patients.",
+              "fully_supported": true
+            },
+            {
+              "text": "Impacted payers are also required to maintain an attribution process to associate patients with in-network or enrolled providers with whom they have a treatment relationship and allow patients to opt out of having their data available to providers under these requirements. Impacted payers will be required to provide plain language information to patients about the benefits of API data exchange with their providers and their ability to opt out.",
+              "fully_supported": true
+            },
+            {
+              "text": "Impacted payers must also make available an X12-only prior authorization transaction, as well as claims and encounter data (excluding provider remittances and enrollee cost-sharing information), and specified prior authorization information (excluding",
+              "fully_supported": false
+            }
+          ],
+          "citations": [
+            {
+              "statement_index": 0,
+              "citation_index": 0,
+              "source": "cms_prior_authorization_fact_sheet.pdf (page 1)",
+              "contributes_support": false
+            },
+            {
+              "statement_index": 0,
+              "citation_index": 1,
+              "source": "cms_prior_authorization_fact_sheet.pdf (page 2)",
+              "contributes_support": true
+            },
+            {
+              "statement_index": 0,
+              "citation_index": 2,
+              "source": "cms_prior_authorization_fact_sheet.pdf (page 3)",
+              "contributes_support": true
+            },
+            {
+              "statement_index": 1,
+              "citation_index": 0,
+              "source": "cms_prior_authorization_fact_sheet.pdf (page 1)",
+              "contributes_support": false
+            },
+            {
+              "statement_index": 1,
+              "citation_index": 1,
+              "source": "cms_prior_authorization_fact_sheet.pdf (page 2)",
+              "contributes_support": true
+            },
+            {
+              "statement_index": 1,
+              "citation_index": 2,
+              "source": "cms_prior_authorization_fact_sheet.pdf (page 3)",
+              "contributes_support": true
+            },
+            {
+              "statement_index": 2,
+              "citation_index": 0,
+              "source": "cms_prior_authorization_fact_sheet.pdf (page 1)",
+              "contributes_support": false
+            },
+            {
+              "statement_index": 2,
+              "citation_index": 1,
+              "source": "cms_prior_authorization_fact_sheet.pdf (page 2)",
+              "contributes_support": true
+            },
+            {
+              "statement_index": 2,
+              "citation_index": 2,
+              "source": "cms_prior_authorization_fact_sheet.pdf (page 3)",
+              "contributes_support": false
+            },
+            {
+              "statement_index": 3,
+              "citation_index": 0,
+              "source": "cms_prior_authorization_fact_sheet.pdf (page 1)",
+              "contributes_support": false
+            },
+            {
+              "statement_index": 3,
+              "citation_index": 1,
+              "source": "cms_prior_authorization_fact_sheet.pdf (page 2)",
+              "contributes_support": true
+            },
+            {
+              "statement_index": 3,
+              "citation_index": 2,
+              "source": "cms_prior_authorization_fact_sheet.pdf (page 3)",
+              "contributes_support": false
+            },
+            {
+              "statement_index": 4,
+              "citation_index": 0,
+              "source": "cms_prior_authorization_fact_sheet.pdf (page 1)",
+              "contributes_support": false
+            },
+            {
+              "statement_index": 4,
+              "citation_index": 1,
+              "source": "cms_prior_authorization_fact_sheet.pdf (page 2)",
+              "contributes_support": true
+            },
+            {
+              "statement_index": 4,
+              "citation_index": 2,
+              "source": "cms_prior_authorization_fact_sheet.pdf (page 3)",
+              "contributes_support": true
+            }
+          ],
+          "notes": "Strict label: the answer contradicts itself on drugs, changes request method to decision method, and includes a truncated final statement."
+        }
+      },
+      "policycite_rag": {
+        "status": "complete",
+        "output": {
+          "question": "What must impacted payers provide when they deny a prior authorization request beginning in 2026?",
+          "answer": "Impacted payers must provide a specific reason for denied prior authorization decisions, regardless of the method used to send the decision. [S1] This provision applies to all prior authorization decisions, including those for drugs.\n\nImpacted payers are also required to communicate the denial reason via portal, fax, email, mail, or phone. [S2] The requirement does not apply to prior authorization decisions for drugs.\n\nAdditionally, impacted payers must provide plain language information to patients about the benefits of API data exchange with their providers and their ability to opt out. [S3] This provision is intended to facilitate better communication between payers, providers, and patients.\n\nImpacted payers are also required to maintain an attribution process to associate patients with in-network or enrolled providers with whom they have a treatment relationship and allow patients to opt out of having their data available to providers under these requirements. [S1] Impacted payers will be required to provide plain language information to patients about the benefits of API data exchange with their providers and their ability to opt out.\n\nImpacted payers must also make available an X12-only prior authorization transaction, as well as claims and encounter data (excluding provider remittances and enrollee cost-sharing information), and specified prior authorization information (excluding",
+          "baseline_sources": [
+            "cms_prior_authorization_fact_sheet.pdf (page 1)",
+            "cms_prior_authorization_fact_sheet.pdf (page 2)",
+            "cms_prior_authorization_fact_sheet.pdf (page 3)"
+          ],
+          "generation_context_ids": [
+            "fcd7d7ffeac21672",
+            "a3893de21b2a5d2c",
+            "3f6824c26ab27f3b",
+            "258eee3e7010613e",
+            "d95702bf9d80b6b8",
+            "8653f9767c077bb3",
+            "6af71b3fd447a6fb",
+            "1ea1821b8d84b8ce"
+          ],
+          "statements": [
+            {
+              "text": "Impacted payers must provide a specific reason for denied prior authorization decisions, regardless of the method used to send the decision. This provision applies to all prior authorization decisions, including those for drugs.",
+              "verdict": "SUPPORTED",
+              "citations": [
+                {
+                  "citation_id": "a3893de21b2a5d2c",
+                  "source": "cms_prior_authorization_fact_sheet.pdf",
+                  "page": 3,
+                  "evidence_excerpt": "Provider Notice, Including Denial Reason: Beginning in 2026, impacted payers must provide a \nspecific reason for denied prior authorization decisions, regardless of the method used to send the \nprior authorization request.",
+                  "retrieval_score": 0.03278688524590164,
+                  "context_type": "post_generation"
+                }
+              ],
+              "reason": "Near-verbatim support found in the retrieved passage."
+            },
+            {
+              "text": "Impacted payers are also required to communicate the denial reason via portal, fax, email, mail, or phone. The requirement does not apply to prior authorization decisions for drugs.",
+              "verdict": "SUPPORTED",
+              "citations": [
+                {
+                  "citation_id": "a3893de21b2a5d2c",
+                  "source": "cms_prior_authorization_fact_sheet.pdf",
+                  "page": 3,
+                  "evidence_excerpt": "Provider Notice, Including Denial Reason: Beginning in 2026, impacted payers must provide a \nspecific reason for denied prior authorization decisions, regardless of the method used to send the \nprior authorization request.",
+                  "retrieval_score": 0.03278688524590164,
+                  "context_type": "post_generation"
+                }
+              ],
+              "reason": "Near-verbatim support found in the retrieved passage."
+            },
+            {
+              "text": "Additionally, impacted payers must provide plain language information to patients about the benefits of API data exchange with their providers and their ability to opt out. This provision is intended to facilitate better communication between payers, providers, and patients.",
+              "verdict": "NOT_SUPPORTED",
+              "citations": [],
+              "reason": null
+            },
+            {
+              "text": "Impacted payers are also required to maintain an attribution process to associate patients with in-network or enrolled providers with whom they have a treatment relationship and allow patients to opt out of having their data available to providers under these requirements. Impacted payers will be required to provide plain language information to patients about the benefits of API data exchange with their providers and their ability to opt out.",
+              "verdict": "SUPPORTED",
+              "citations": [
+                {
+                  "citation_id": "fcd7d7ffeac21672",
+                  "source": "cms_prior_authorization_fact_sheet.pdf",
+                  "page": 2,
+                  "evidence_excerpt": "We are also requiring impacted payers to maintain an attribution process to associate patients with \nin-network or enrolled providers with whom they have a treatment relationship and to allow \npatients to opt out of having their data available to providers under these requirements.",
+                  "retrieval_score": 0.03278688524590164,
+                  "context_type": "post_generation"
+                }
+              ],
+              "reason": "Near-verbatim support found in the retrieved passage."
+            },
+            {
+              "text": "Impacted payers must also make available an X12-only prior authorization transaction, as well as claims and encounter data (excluding provider remittances and enrollee cost-sharing information), and specified prior authorization information (excluding",
+              "verdict": "SUPPORTED",
+              "citations": [
+                {
+                  "citation_id": "fcd7d7ffeac21672",
+                  "source": "cms_prior_authorization_fact_sheet.pdf",
+                  "page": 2,
+                  "evidence_excerpt": "Impacted payers will \nbe required to make the following data available via the Provider Access API: individual claims and \nencounter data (without provider remittances and enrollee cost-sharing information); data classes \nand data elements in the United States Core Data for Interoperability (USCDI); and specified prior \nauthorization information (excluding those for drugs).",
+                  "retrieval_score": 0.03252247488101534,
+                  "context_type": "post_generation"
+                }
+              ],
+              "reason": "Near-verbatim support found in the retrieved passage."
+            }
+          ],
+          "citation_coverage": 0.8,
+          "needs_human_review": true,
+          "latency_ms": 31981.31545796059
+        },
+        "human_labels": {
+          "required_claims": [
+            {
+              "claim": "Beginning in 2026, a specific denial reason is required.",
+              "retained": false
+            },
+            {
+              "claim": "The requirement applies regardless of the request method.",
+              "retained": false
+            },
+            {
+              "claim": "The provision does not apply to prior authorization decisions for drugs.",
+              "retained": false
+            }
+          ],
+          "statements": [
+            {
+              "text": "Impacted payers must provide a specific reason for denied prior authorization decisions, regardless of the method used to send the decision. This provision applies to all prior authorization decisions, including those for drugs.",
+              "fully_supported": false
+            },
+            {
+              "text": "Impacted payers are also required to communicate the denial reason via portal, fax, email, mail, or phone. The requirement does not apply to prior authorization decisions for drugs.",
+              "fully_supported": true
+            },
+            {
+              "text": "Additionally, impacted payers must provide plain language information to patients about the benefits of API data exchange with their providers and their ability to opt out. This provision is intended to facilitate better communication between payers, providers, and patients.",
+              "fully_supported": true
+            },
+            {
+              "text": "Impacted payers are also required to maintain an attribution process to associate patients with in-network or enrolled providers with whom they have a treatment relationship and allow patients to opt out of having their data available to providers under these requirements. Impacted payers will be required to provide plain language information to patients about the benefits of API data exchange with their providers and their ability to opt out.",
+              "fully_supported": true
+            },
+            {
+              "text": "Impacted payers must also make available an X12-only prior authorization transaction, as well as claims and encounter data (excluding provider remittances and enrollee cost-sharing information), and specified prior authorization information (excluding",
+              "fully_supported": false
+            }
+          ],
+          "citations": [
+            {
+              "statement_index": 0,
+              "citation_index": 0,
+              "citation_id": "a3893de21b2a5d2c",
+              "source": "cms_prior_authorization_fact_sheet.pdf",
+              "page": 3,
+              "evidence_excerpt": "Provider Notice, Including Denial Reason: Beginning in 2026, impacted payers must provide a \nspecific reason for denied prior authorization decisions, regardless of the method used to send the \nprior authorization request.",
+              "contributes_support": true
+            },
+            {
+              "statement_index": 1,
+              "citation_index": 0,
+              "citation_id": "a3893de21b2a5d2c",
+              "source": "cms_prior_authorization_fact_sheet.pdf",
+              "page": 3,
+              "evidence_excerpt": "Provider Notice, Including Denial Reason: Beginning in 2026, impacted payers must provide a \nspecific reason for denied prior authorization decisions, regardless of the method used to send the \nprior authorization request.",
+              "contributes_support": true
+            },
+            {
+              "statement_index": 3,
+              "citation_index": 0,
+              "citation_id": "fcd7d7ffeac21672",
+              "source": "cms_prior_authorization_fact_sheet.pdf",
+              "page": 2,
+              "evidence_excerpt": "We are also requiring impacted payers to maintain an attribution process to associate patients with \nin-network or enrolled providers with whom they have a treatment relationship and to allow \npatients to opt out of having their data available to providers under these requirements.",
+              "contributes_support": true
+            },
+            {
+              "statement_index": 4,
+              "citation_index": 0,
+              "citation_id": "fcd7d7ffeac21672",
+              "source": "cms_prior_authorization_fact_sheet.pdf",
+              "page": 2,
+              "evidence_excerpt": "Impacted payers will \nbe required to make the following data available via the Provider Access API: individual claims and \nencounter data (without provider remittances and enrollee cost-sharing information); data classes \nand data elements in the United States Core Data for Interoperability (USCDI); and specified prior \nauthorization information (excluding those for drugs).",
+              "contributes_support": true
+            }
+          ],
+          "notes": "Strict label: the answer contradicts itself on drugs, changes request method to decision method, and includes a truncated final statement."
+        }
+      }
+    },
+    {
+      "id": "policy-005",
+      "question": "Must initial Medicare claims be filed electronically, and when may a CMS-1500 paper claim be used?",
+      "category": "directly_answerable",
+      "reference": {
+        "expected_answerable": true,
+        "reference_answer": "Initial Medicare claims generally must be submitted electronically. A CMS-1500 paper claim may be used when the submitter qualifies for an exception or waiver under the Administrative Simplification Compliance Act.",
+        "required_claims": [
+          "Initial Medicare claims generally must be submitted electronically.",
+          "A qualifying ASCA waiver or exception permits paper submission."
+        ],
+        "gold_evidence": [
+          {
+            "source": "mln006976_medicare_billing_cms_1500_837p.pdf",
+            "page": 7,
+            "excerpt": "Submit initial Medicare claims electronically unless you qualify for a waiver or exception under the ASCA."
+          },
+          {
+            "source": "mln006976_medicare_billing_cms_1500_837p.pdf",
+            "page": 2,
+            "excerpt": "CMS lets providers submit a paper claim if they meet Administrative Simplification Compliance Act (ASCA) exceptions."
+          }
+        ],
+        "notes": "Evidence spans zero-based pages 7 and 2 (display pages 8 and 3). Answers need not list every ASCA exception."
+      },
+      "baseline": {
+        "status": "complete",
+        "output": {
+          "answer": "MLN BookletMedicare Billing: CMS-1500 & 837P MLN006976 December 2025Page 8 of 11 Electronic Filing Exceptions & Unusual Circumstance Waivers Submit initial Medicare claims electronically unless you qualify for a waiver or exception under the ASCA. [S1]\nThe paper form prescribed for physicians and suppliers is Form CMS-1500 (Health Insurance Claim Form). [S3]",
+          "sources": [
+            "medicare_timely_filing_mln.pdf (page 9)",
+            "mln006976_medicare_billing_cms_1500_837p.pdf (page 8)"
+          ],
+          "confidence": 0.95,
+          "normalized_query": "must initial medicare claims be filed electronically, and when may a cms-1500 paper claim be used?",
+          "latency_ms": 10902.751291985624
+        },
+        "human_labels": {
+          "required_claims": [
+            {
+              "claim": "Initial Medicare claims generally must be submitted electronically.",
+              "retained": true
+            },
+            {
+              "claim": "A qualifying ASCA waiver or exception permits paper submission.",
+              "retained": true
+            }
+          ],
+          "statements": [
+            {
+              "text": "MLN BookletMedicare Billing: CMS-1500 & 837P MLN006976 December 2025Page 8 of 11 Electronic Filing Exceptions & Unusual Circumstance Waivers Submit initial Medicare claims electronically unless you qualify for a waiver or exception under the ASCA.",
+              "fully_supported": true
+            },
+            {
+              "text": "The paper form prescribed for physicians and suppliers is Form CMS-1500 (Health Insurance Claim Form).",
+              "fully_supported": true
+            }
+          ],
+          "citations": [
+            {
+              "statement_index": 0,
+              "citation_index": 0,
+              "source": "medicare_timely_filing_mln.pdf (page 9)",
+              "contributes_support": true
+            },
+            {
+              "statement_index": 0,
+              "citation_index": 1,
+              "source": "mln006976_medicare_billing_cms_1500_837p.pdf (page 8)",
+              "contributes_support": true
+            },
+            {
+              "statement_index": 1,
+              "citation_index": 0,
+              "source": "medicare_timely_filing_mln.pdf (page 9)",
+              "contributes_support": true
+            },
+            {
+              "statement_index": 1,
+              "citation_index": 1,
+              "source": "mln006976_medicare_billing_cms_1500_837p.pdf (page 8)",
+              "contributes_support": true
+            }
+          ],
+          "notes": "Independently checked against the reference and corpus evidence."
+        }
+      },
+      "policycite_rag": {
+        "status": "complete",
+        "output": {
+          "question": "Must initial Medicare claims be filed electronically, and when may a CMS-1500 paper claim be used?",
+          "answer": "MLN BookletMedicare Billing: CMS-1500 & 837P MLN006976 December 2025Page 8 of 11 Electronic Filing Exceptions & Unusual Circumstance Waivers Submit initial Medicare claims electronically unless you qualify for a waiver or exception under the ASCA. [S1]\nThe paper form prescribed for physicians and suppliers is Form CMS-1500 (Health Insurance Claim Form). [S3]",
+          "baseline_sources": [
+            "medicare_timely_filing_mln.pdf (page 9)",
+            "mln006976_medicare_billing_cms_1500_837p.pdf (page 8)"
+          ],
+          "generation_context_ids": [
+            "eae55d8e276649a6",
+            "8653f9767c077bb3",
+            "a6cf6315d12a4f43",
+            "58d213f047ca2e1a",
+            "b34823c148bff3a2",
+            "97b038c412a2f127",
+            "25cd4063a38b34ea",
+            "140eab1a00f78040"
+          ],
+          "statements": [
+            {
+              "text": "MLN BookletMedicare Billing: CMS-1500 & 837P MLN006976 December 2025Page 8 of 11 Electronic Filing Exceptions & Unusual Circumstance Waivers Submit initial Medicare claims electronically unless you qualify for a waiver or exception under the ASCA.",
+              "verdict": "SUPPORTED",
+              "citations": [
+                {
+                  "citation_id": "eae55d8e276649a6",
+                  "source": "mln006976_medicare_billing_cms_1500_837p.pdf",
+                  "page": 8,
+                  "evidence_excerpt": "MLN BookletMedicare Billing: CMS-1500 & 837P\nMLN006976 December 2025Page 8 of 11\nElectronic Filing Exceptions & Unusual Circumstance Waivers\nSubmit initial Medicare claims electronically unless you qualify for a waiver or exception under the ASCA.",
+                  "retrieval_score": 0.03278688524590164,
+                  "context_type": "post_generation"
+                }
+              ],
+              "reason": "Near-verbatim support found in the retrieved passage."
+            },
+            {
+              "text": "The paper form prescribed for physicians and suppliers is Form CMS-1500 (Health Insurance Claim Form).",
+              "verdict": "SUPPORTED",
+              "citations": [
+                {
+                  "citation_id": "a6cf6315d12a4f43",
+                  "source": "medicare_timely_filing_mln.pdf",
+                  "page": 9,
+                  "evidence_excerpt": "The paper form prescribed for physicians and \nsuppliers is Form CMS-1500 (Health Insurance Claim Form).",
+                  "retrieval_score": 0.03177805800756621,
+                  "context_type": "post_generation"
+                }
+              ],
+              "reason": "Near-verbatim support found in the retrieved passage."
+            }
+          ],
+          "citation_coverage": 1.0,
+          "needs_human_review": false,
+          "latency_ms": 11769.783833005931
+        },
+        "human_labels": {
+          "required_claims": [
+            {
+              "claim": "Initial Medicare claims generally must be submitted electronically.",
+              "retained": true
+            },
+            {
+              "claim": "A qualifying ASCA waiver or exception permits paper submission.",
+              "retained": true
+            }
+          ],
+          "statements": [
+            {
+              "text": "MLN BookletMedicare Billing: CMS-1500 & 837P MLN006976 December 2025Page 8 of 11 Electronic Filing Exceptions & Unusual Circumstance Waivers Submit initial Medicare claims electronically unless you qualify for a waiver or exception under the ASCA.",
+              "fully_supported": true
+            },
+            {
+              "text": "The paper form prescribed for physicians and suppliers is Form CMS-1500 (Health Insurance Claim Form).",
+              "fully_supported": true
+            }
+          ],
+          "citations": [
+            {
+              "statement_index": 0,
+              "citation_index": 0,
+              "citation_id": "eae55d8e276649a6",
+              "source": "mln006976_medicare_billing_cms_1500_837p.pdf",
+              "page": 8,
+              "evidence_excerpt": "MLN BookletMedicare Billing: CMS-1500 & 837P\nMLN006976 December 2025Page 8 of 11\nElectronic Filing Exceptions & Unusual Circumstance Waivers\nSubmit initial Medicare claims electronically unless you qualify for a waiver or exception under the ASCA.",
+              "contributes_support": true
+            },
+            {
+              "statement_index": 1,
+              "citation_index": 0,
+              "citation_id": "a6cf6315d12a4f43",
+              "source": "medicare_timely_filing_mln.pdf",
+              "page": 9,
+              "evidence_excerpt": "The paper form prescribed for physicians and \nsuppliers is Form CMS-1500 (Health Insurance Claim Form).",
+              "contributes_support": true
+            }
+          ],
+          "notes": "Independently checked against the reference and corpus evidence."
+        }
+      }
+    },
+    {
+      "id": "policy-006",
+      "question": "What happens to a Medicare fee-for-service claim filed after 12 months, and what exceptions can extend the deadline?",
+      "category": "multi_statement",
+      "reference": {
+        "expected_answerable": true,
+        "reference_answer": "A claim received more than 12 months after the services were furnished is denied as untimely unless an exception applies. The listed exceptions cover qualifying administrative error or misrepresentation, retroactive Medicare entitlement, a State Medicaid agency's qualifying recoupment after retroactive entitlement, and qualifying retroactive disenrollment from a Medicare Advantage plan or PACE organization.",
+        "required_claims": [
+          "Claims received after 12 months are denied as untimely unless an exception applies.",
+          "Administrative error or misrepresentation may qualify as an exception.",
+          "Retroactive Medicare entitlement may qualify as an exception.",
+          "Qualifying State Medicaid recoupment may qualify as an exception.",
+          "Qualifying retroactive MA or PACE disenrollment may qualify as an exception."
+        ],
+        "gold_evidence": [
+          {
+            "source": "medicare_timely_filing_mln.pdf",
+            "page": 4,
+            "excerpt": "Contractors shall deny claims received after 12 months from the date services were furnished as untimely filed claims, and continue to use the remittance advice messages and Medicare Summary Notice messages previously specified in CR 6960 unless one of the exceptions outlined in sections 70.7.1 through 70.7.4 of Pub. 100-04, Chapter1 applies."
+          },
+          {
+            "source": "medicare_timely_filing_mln.pdf",
+            "page": 3,
+            "excerpt": "Exceptions to the 1 calendar year time limit for filing Medicare claims are as follows: (1) error or misrepresentation by an employee, Medicare contractor, or agent of the Department of HHS that was performing Medicare functions and acting within the scope of its authority; (2) retroactive Medicare entitlement to or before the date of the furnished service; (3) retroactive Medicare entitlement where a State Medicaid Agency recoups money from a provider or supplier 6 months or more after the service was furnished; (4) a Medicare Advantage plan or Program of All-inclusive Care for the Elderly (PACE) provider organization recoups money from a provider or supplier 6 months or more after the service was furnished to a beneficiary who was retroactively disenrolled to or before the date of the furnished service."
+          }
+        ],
+        "notes": "Evidence uses zero-based pages 4 and 3 (display pages 5 and 4). The answer should not imply that any late claim automatically receives an extension."
+      },
+      "baseline": {
+        "status": "complete",
+        "output": {
+          "answer": "Contractors shall deny claims received after 12 months from the date services were furnished as untimely filed claims, and continue to use the remittance advice messages and Medicare Summary Notice messages previously specified in CR 6960 unless one of the exceptions outlined in sections 70.7.1 through 70.7.4 of Pub. [S2]\nContractors shall extend the 1 calendar year timely filing limit through the last day of the 6th calendar month following the month in which a Medicare Advantage plan or Program of All-inclusive Care for the Elderly (PACE) provider organization recovered its payment from a provider or supplier 6 months or more after date the service was furnished. [S2]\nContractors shall extend the 1 calendar year timely filing limit through the last day of the 6th calendar month following the month in which a State Medicaid agency recovered Medicaid payment from a provider or supplier 6 months or more after the date the service was furnished. [S2]\nExceptions to the 1 calendar year time limit for filing Medicare claims are as follows: (1) error or misrepresentation by an employee, Medicare contractor, or agent of the Department of HHS that was performing Medicare functions and acting within the scope of its authority [S1]\n(2) retroactive Medicare entitlement to or before the date of the furnished service [S1]",
+          "sources": [
+            "medicare_timely_filing_mln.pdf (page 4)",
+            "medicare_timely_filing_mln.pdf (page 5)"
+          ],
+          "confidence": 0.95,
+          "normalized_query": "what happens to a medicare fee-for-service claim filed after 12 months, and what exceptions can extend the deadline?",
+          "latency_ms": 9970.68504197523
+        },
+        "human_labels": {
+          "required_claims": [
+            {
+              "claim": "Claims received after 12 months are denied as untimely unless an exception applies.",
+              "retained": true
+            },
+            {
+              "claim": "Administrative error or misrepresentation may qualify as an exception.",
+              "retained": true
+            },
+            {
+              "claim": "Retroactive Medicare entitlement may qualify as an exception.",
+              "retained": true
+            },
+            {
+              "claim": "Qualifying State Medicaid recoupment may qualify as an exception.",
+              "retained": true
+            },
+            {
+              "claim": "Qualifying retroactive MA or PACE disenrollment may qualify as an exception.",
+              "retained": true
+            }
+          ],
+          "statements": [
+            {
+              "text": "Contractors shall deny claims received after 12 months from the date services were furnished as untimely filed claims, and continue to use the remittance advice messages and Medicare Summary Notice messages previously specified in CR 6960 unless one of the exceptions outlined in sections 70.7.1 through 70.7.4 of Pub.",
+              "fully_supported": true
+            },
+            {
+              "text": "Contractors shall extend the 1 calendar year timely filing limit through the last day of the 6th calendar month following the month in which a Medicare Advantage plan or Program of All-inclusive Care for the Elderly (PACE) provider organization recovered its payment from a provider or supplier 6 months or more after date the service was furnished.",
+              "fully_supported": true
+            },
+            {
+              "text": "Contractors shall extend the 1 calendar year timely filing limit through the last day of the 6th calendar month following the month in which a State Medicaid agency recovered Medicaid payment from a provider or supplier 6 months or more after the date the service was furnished.",
+              "fully_supported": true
+            },
+            {
+              "text": "Exceptions to the 1 calendar year time limit for filing Medicare claims are as follows: (1) error or misrepresentation by an employee, Medicare contractor, or agent of the Department of HHS that was performing Medicare functions and acting within the scope of its authority",
+              "fully_supported": true
+            }
+          ],
+          "citations": [
+            {
+              "statement_index": 0,
+              "citation_index": 0,
+              "source": "medicare_timely_filing_mln.pdf (page 4)",
+              "contributes_support": true
+            },
+            {
+              "statement_index": 0,
+              "citation_index": 1,
+              "source": "medicare_timely_filing_mln.pdf (page 5)",
+              "contributes_support": true
+            },
+            {
+              "statement_index": 1,
+              "citation_index": 0,
+              "source": "medicare_timely_filing_mln.pdf (page 4)",
+              "contributes_support": true
+            },
+            {
+              "statement_index": 1,
+              "citation_index": 1,
+              "source": "medicare_timely_filing_mln.pdf (page 5)",
+              "contributes_support": true
+            },
+            {
+              "statement_index": 2,
+              "citation_index": 0,
+              "source": "medicare_timely_filing_mln.pdf (page 4)",
+              "contributes_support": true
+            },
+            {
+              "statement_index": 2,
+              "citation_index": 1,
+              "source": "medicare_timely_filing_mln.pdf (page 5)",
+              "contributes_support": true
+            },
+            {
+              "statement_index": 3,
+              "citation_index": 0,
+              "source": "medicare_timely_filing_mln.pdf (page 4)",
+              "contributes_support": true
+            },
+            {
+              "statement_index": 3,
+              "citation_index": 1,
+              "source": "medicare_timely_filing_mln.pdf (page 5)",
+              "contributes_support": true
+            }
+          ],
+          "notes": "Independently checked against the reference and corpus evidence."
+        }
+      },
+      "policycite_rag": {
+        "status": "complete",
+        "output": {
+          "question": "What happens to a Medicare fee-for-service claim filed after 12 months, and what exceptions can extend the deadline?",
+          "answer": "Contractors shall deny claims received after 12 months from the date services were furnished as untimely filed claims, and continue to use the remittance advice messages and Medicare Summary Notice messages previously specified in CR 6960 unless one of the exceptions outlined in sections 70.7.1 through 70.7.4 of Pub. [S2]\nContractors shall extend the 1 calendar year timely filing limit through the last day of the 6th calendar month following the month in which a Medicare Advantage plan or Program of All-inclusive Care for the Elderly (PACE) provider organization recovered its payment from a provider or supplier 6 months or more after date the service was furnished. [S2]\nContractors shall extend the 1 calendar year timely filing limit through the last day of the 6th calendar month following the month in which a State Medicaid agency recovered Medicaid payment from a provider or supplier 6 months or more after the date the service was furnished. [S2]\nExceptions to the 1 calendar year time limit for filing Medicare claims are as follows: (1) error or misrepresentation by an employee, Medicare contractor, or agent of the Department of HHS that was performing Medicare functions and acting within the scope of its authority [S1]\n(2) retroactive Medicare entitlement to or before the date of the furnished service [S1]",
+          "baseline_sources": [
+            "medicare_timely_filing_mln.pdf (page 4)",
+            "medicare_timely_filing_mln.pdf (page 5)"
+          ],
+          "generation_context_ids": [
+            "d5b05447810f4f76",
+            "8a0a62a043f4c9df",
+            "54d3c5ef813f7124",
+            "e59e1835da765e00",
+            "b8cec74a16960ec1",
+            "8653f9767c077bb3",
+            "1ea1821b8d84b8ce",
+            "3654232cc7fefab7"
+          ],
+          "statements": [
+            {
+              "text": "Contractors shall deny claims received after 12 months from the date services were furnished as untimely filed claims, and continue to use the remittance advice messages and Medicare Summary Notice messages previously specified in CR 6960 unless one of the exceptions outlined in sections 70.7.1 through 70.7.4 of Pub.",
+              "verdict": "SUPPORTED",
+              "citations": [
+                {
+                  "citation_id": "8a0a62a043f4c9df",
+                  "source": "medicare_timely_filing_mln.pdf",
+                  "page": 5,
+                  "evidence_excerpt": "X X X X X      \n7270.4 Contractors shall deny claims received after 12 months \nfrom the date services were furnished as untimely filed \nclaims, and continue to use the remittance advice \nmessages and Medicare Summary Notice messages \npreviously specified in CR 6960 unless one of the \nexceptions outlined in sections 70.7.1 through 70.7.4 of \nPub.",
+                  "retrieval_score": 0.03278688524590164,
+                  "context_type": "post_generation"
+                }
+              ],
+              "reason": "Near-verbatim support found in the retrieved passage."
+            },
+            {
+              "text": "Contractors shall extend the 1 calendar year timely filing limit through the last day of the 6th calendar month following the month in which a Medicare Advantage plan or Program of All-inclusive Care for the Elderly (PACE) provider organization recovered its payment from a provider or supplier 6 months or more after date the service was furnished.",
+              "verdict": "SUPPORTED",
+              "citations": [
+                {
+                  "citation_id": "8a0a62a043f4c9df",
+                  "source": "medicare_timely_filing_mln.pdf",
+                  "page": 5,
+                  "evidence_excerpt": "X X X X X      \n7270.8 Contractors shall extend the 1 calendar year timely filing \nlimit through the last day of the 6th calendar month \nfollowing the month in which a Medicare Advantage plan \nor Program of All-inclusive Care for the Elderly (PACE) \nprovider organization recovered its payment from a \nprovider or supplier 6 months or more after date the \nservice was furnished.",
+                  "retrieval_score": 0.03278688524590164,
+                  "context_type": "post_generation"
+                }
+              ],
+              "reason": "Near-verbatim support found in the retrieved passage."
+            },
+            {
+              "text": "Contractors shall extend the 1 calendar year timely filing limit through the last day of the 6th calendar month following the month in which a State Medicaid agency recovered Medicaid payment from a provider or supplier 6 months or more after the date the service was furnished.",
+              "verdict": "SUPPORTED",
+              "citations": [
+                {
+                  "citation_id": "8a0a62a043f4c9df",
+                  "source": "medicare_timely_filing_mln.pdf",
+                  "page": 5,
+                  "evidence_excerpt": "X X X X X      \n7270.7 Contractors shall extend the 1 calendar year timely filing \nlimit through the last day of the 6th calendar month \nfollowing the month in which a State Medicaid agency \nrecovered Medicaid payment from a provider or supplier \n6 months or more after the date the service was furnished.",
+                  "retrieval_score": 0.03278688524590164,
+                  "context_type": "post_generation"
+                }
+              ],
+              "reason": "Near-verbatim support found in the retrieved passage."
+            },
+            {
+              "text": "Exceptions to the 1 calendar year time limit for filing Medicare claims are as follows: (1) error or misrepresentation by an employee, Medicare contractor, or agent of the Department of HHS that was performing Medicare functions and acting within the scope of its authority",
+              "verdict": "SUPPORTED",
+              "citations": [
+                {
+                  "citation_id": "d5b05447810f4f76",
+                  "source": "medicare_timely_filing_mln.pdf",
+                  "page": 4,
+                  "evidence_excerpt": "Exceptions to the 1 calendar year time limit for filing Medicare \nclaims are as follows:  (1) error or misrepresentation by an employee, Medicare contractor, or agent of the \nDepartment of HHS that was performing Medicare functions and acting within the scope of its authority; (2) \nretroactive Medicare entitlement to or before the date of the furnished service; (3) retroactive Medicare \nentitlement where a State Medicaid Agency recoups money from a provider or supplier 6 months or more after \nthe service was furnished; (4) a Medicare Advantage plan or Program of All-inclusive Care for the Elderly \n(PACE) provider organization recoups money from a provider or supplier 6 months or more after the service \nwas furnished to a beneficiary who was retroactively disenrolled to or before the date of the furnished service.",
+                  "retrieval_score": 0.032018442622950824,
+                  "context_type": "post_generation"
+                }
+              ],
+              "reason": "Near-verbatim support found in the retrieved passage."
+            }
+          ],
+          "citation_coverage": 1.0,
+          "needs_human_review": false,
+          "latency_ms": 10641.826499952003
+        },
+        "human_labels": {
+          "required_claims": [
+            {
+              "claim": "Claims received after 12 months are denied as untimely unless an exception applies.",
+              "retained": true
+            },
+            {
+              "claim": "Administrative error or misrepresentation may qualify as an exception.",
+              "retained": true
+            },
+            {
+              "claim": "Retroactive Medicare entitlement may qualify as an exception.",
+              "retained": true
+            },
+            {
+              "claim": "Qualifying State Medicaid recoupment may qualify as an exception.",
+              "retained": true
+            },
+            {
+              "claim": "Qualifying retroactive MA or PACE disenrollment may qualify as an exception.",
+              "retained": true
+            }
+          ],
+          "statements": [
+            {
+              "text": "Contractors shall deny claims received after 12 months from the date services were furnished as untimely filed claims, and continue to use the remittance advice messages and Medicare Summary Notice messages previously specified in CR 6960 unless one of the exceptions outlined in sections 70.7.1 through 70.7.4 of Pub.",
+              "fully_supported": true
+            },
+            {
+              "text": "Contractors shall extend the 1 calendar year timely filing limit through the last day of the 6th calendar month following the month in which a Medicare Advantage plan or Program of All-inclusive Care for the Elderly (PACE) provider organization recovered its payment from a provider or supplier 6 months or more after date the service was furnished.",
+              "fully_supported": true
+            },
+            {
+              "text": "Contractors shall extend the 1 calendar year timely filing limit through the last day of the 6th calendar month following the month in which a State Medicaid agency recovered Medicaid payment from a provider or supplier 6 months or more after the date the service was furnished.",
+              "fully_supported": true
+            },
+            {
+              "text": "Exceptions to the 1 calendar year time limit for filing Medicare claims are as follows: (1) error or misrepresentation by an employee, Medicare contractor, or agent of the Department of HHS that was performing Medicare functions and acting within the scope of its authority",
+              "fully_supported": true
+            }
+          ],
+          "citations": [
+            {
+              "statement_index": 0,
+              "citation_index": 0,
+              "citation_id": "8a0a62a043f4c9df",
+              "source": "medicare_timely_filing_mln.pdf",
+              "page": 5,
+              "evidence_excerpt": "X X X X X      \n7270.4 Contractors shall deny claims received after 12 months \nfrom the date services were furnished as untimely filed \nclaims, and continue to use the remittance advice \nmessages and Medicare Summary Notice messages \npreviously specified in CR 6960 unless one of the \nexceptions outlined in sections 70.7.1 through 70.7.4 of \nPub.",
+              "contributes_support": true
+            },
+            {
+              "statement_index": 1,
+              "citation_index": 0,
+              "citation_id": "8a0a62a043f4c9df",
+              "source": "medicare_timely_filing_mln.pdf",
+              "page": 5,
+              "evidence_excerpt": "X X X X X      \n7270.8 Contractors shall extend the 1 calendar year timely filing \nlimit through the last day of the 6th calendar month \nfollowing the month in which a Medicare Advantage plan \nor Program of All-inclusive Care for the Elderly (PACE) \nprovider organization recovered its payment from a \nprovider or supplier 6 months or more after date the \nservice was furnished.",
+              "contributes_support": true
+            },
+            {
+              "statement_index": 2,
+              "citation_index": 0,
+              "citation_id": "8a0a62a043f4c9df",
+              "source": "medicare_timely_filing_mln.pdf",
+              "page": 5,
+              "evidence_excerpt": "X X X X X      \n7270.7 Contractors shall extend the 1 calendar year timely filing \nlimit through the last day of the 6th calendar month \nfollowing the month in which a State Medicaid agency \nrecovered Medicaid payment from a provider or supplier \n6 months or more after the date the service was furnished.",
+              "contributes_support": true
+            },
+            {
+              "statement_index": 3,
+              "citation_index": 0,
+              "citation_id": "d5b05447810f4f76",
+              "source": "medicare_timely_filing_mln.pdf",
+              "page": 4,
+              "evidence_excerpt": "Exceptions to the 1 calendar year time limit for filing Medicare \nclaims are as follows:  (1) error or misrepresentation by an employee, Medicare contractor, or agent of the \nDepartment of HHS that was performing Medicare functions and acting within the scope of its authority; (2) \nretroactive Medicare entitlement to or before the date of the furnished service; (3) retroactive Medicare \nentitlement where a State Medicaid Agency recoups money from a provider or supplier 6 months or more after \nthe service was furnished; (4) a Medicare Advantage plan or Program of All-inclusive Care for the Elderly \n(PACE) provider organization recoups money from a provider or supplier 6 months or more after the service \nwas furnished to a beneficiary who was retroactively disenrolled to or before the date of the furnished service.",
+              "contributes_support": true
+            }
+          ],
+          "notes": "Independently checked against the reference and corpus evidence."
+        }
+      }
+    },
+    {
+      "id": "policy-007",
+      "question": "What prior authorization process changes begin in 2026, including decision timing, denial notices, and public reporting?",
+      "category": "multi_statement",
+      "reference": {
+        "expected_answerable": true,
+        "reference_answer": "Impacted payers, excluding QHP issuers on the FFEs for the timing rule, must decide expedited requests within 72 hours and standard requests within seven calendar days. Beginning in 2026 they must give a specific reason for denials, except for drug prior authorization decisions, and publicly report specified prior authorization metrics annually. The initial metrics are due by March 31, 2026.",
+        "required_claims": [
+          "Expedited and standard decision timeframes are 72 hours and seven calendar days, respectively.",
+          "Specific denial reasons are required beginning in 2026.",
+          "The denial-reason provision excludes drug prior authorization decisions.",
+          "Impacted payers must publicly report specified metrics annually.",
+          "The initial metrics are due March 31, 2026."
+        ],
+        "gold_evidence": [
+          {
+            "source": "cms_prior_authorization_fact_sheet.pdf",
+            "page": 2,
+            "excerpt": "We are requiring impacted payers (excluding QHP issuers on the FFEs) to send prior authorization decisions within 72 hours for expedited (i.e., urgent) requests and seven calendar days for standard (i.e., non-urgent) requests."
+          },
+          {
+            "source": "cms_prior_authorization_fact_sheet.pdf",
+            "page": 2,
+            "excerpt": "Beginning in 2026, impacted payers must provide a specific reason for denied prior authorization decisions, regardless of the method used to send the prior authorization request."
+          },
+          {
+            "source": "cms_prior_authorization_fact_sheet.pdf",
+            "page": 2,
+            "excerpt": "As with all policies in this final rule, this provision does not apply to prior authorization decisions for drugs."
+          },
+          {
+            "source": "cms_prior_authorization_fact_sheet.pdf",
+            "page": 2,
+            "excerpt": "Prior Authorization Metrics: We are requiring impacted payers to publicly report certain prior authorization metrics annually by posting them on their website."
+          },
+          {
+            "source": "cms_prior_authorization_fact_sheet.pdf",
+            "page": 2,
+            "excerpt": "These operational or process-related prior authorization policies are being finalized with a compliance date starting January 1, 2026, and the initial set of metrics must be reported by March 31, 2026."
+          }
+        ],
+        "notes": "All evidence is on zero-based page 2 (display page 3). Keep decision deadlines distinct from appeal deadlines."
+      },
+      "baseline": {
+        "status": "complete",
+        "output": {
+          "answer": "Provider Notice, Including Denial Reason: Beginning in 2026, impacted payers must provide a specific reason for denied prior authorization decisions, regardless of the method used to send the prior authorization request. [S1]",
+          "sources": [
+            "cms_prior_authorization_fact_sheet.pdf (page 3)"
+          ],
+          "confidence": 0.95,
+          "normalized_query": "what prior authorization process changes begin in 2026, including decision timing, denial notices, and public reporting?",
+          "latency_ms": 6725.894500035793
+        },
+        "human_labels": {
+          "required_claims": [
+            {
+              "claim": "Expedited and standard decision timeframes are 72 hours and seven calendar days, respectively.",
+              "retained": false
+            },
+            {
+              "claim": "Specific denial reasons are required beginning in 2026.",
+              "retained": true
+            },
+            {
+              "claim": "The denial-reason provision excludes drug prior authorization decisions.",
+              "retained": false
+            },
+            {
+              "claim": "Impacted payers must publicly report specified metrics annually.",
+              "retained": false
+            },
+            {
+              "claim": "The initial metrics are due March 31, 2026.",
+              "retained": false
+            }
+          ],
+          "statements": [
+            {
+              "text": "Provider Notice, Including Denial Reason: Beginning in 2026, impacted payers must provide a specific reason for denied prior authorization decisions, regardless of the method used to send the prior authorization request.",
+              "fully_supported": true
+            }
+          ],
+          "citations": [
+            {
+              "statement_index": 0,
+              "citation_index": 0,
+              "source": "cms_prior_authorization_fact_sheet.pdf (page 3)",
+              "contributes_support": true
+            }
+          ],
+          "notes": "The answer retained only the 2026 specific-denial-reason requirement; the other four required claims were omitted."
+        }
+      },
+      "policycite_rag": {
+        "status": "complete",
+        "output": {
+          "question": "What prior authorization process changes begin in 2026, including decision timing, denial notices, and public reporting?",
+          "answer": "Provider Notice, Including Denial Reason: Beginning in 2026, impacted payers must provide a specific reason for denied prior authorization decisions, regardless of the method used to send the prior authorization request. [S1]",
+          "baseline_sources": [
+            "cms_prior_authorization_fact_sheet.pdf (page 3)"
+          ],
+          "generation_context_ids": [
+            "a3893de21b2a5d2c",
+            "fcd7d7ffeac21672",
+            "3f6824c26ab27f3b",
+            "258eee3e7010613e",
+            "6af71b3fd447a6fb",
+            "d5b05447810f4f76",
+            "140eab1a00f78040",
+            "25cd4063a38b34ea"
+          ],
+          "statements": [
+            {
+              "text": "Provider Notice, Including Denial Reason: Beginning in 2026, impacted payers must provide a specific reason for denied prior authorization decisions, regardless of the method used to send the prior authorization request.",
+              "verdict": "SUPPORTED",
+              "citations": [
+                {
+                  "citation_id": "a3893de21b2a5d2c",
+                  "source": "cms_prior_authorization_fact_sheet.pdf",
+                  "page": 3,
+                  "evidence_excerpt": "Provider Notice, Including Denial Reason: Beginning in 2026, impacted payers must provide a \nspecific reason for denied prior authorization decisions, regardless of the method used to send the \nprior authorization request.",
+                  "retrieval_score": 0.03278688524590164,
+                  "context_type": "post_generation"
+                }
+              ],
+              "reason": "Near-verbatim support found in the retrieved passage."
+            }
+          ],
+          "citation_coverage": 1.0,
+          "needs_human_review": false,
+          "latency_ms": 6797.405833087396
+        },
+        "human_labels": {
+          "required_claims": [
+            {
+              "claim": "Expedited and standard decision timeframes are 72 hours and seven calendar days, respectively.",
+              "retained": false
+            },
+            {
+              "claim": "Specific denial reasons are required beginning in 2026.",
+              "retained": true
+            },
+            {
+              "claim": "The denial-reason provision excludes drug prior authorization decisions.",
+              "retained": false
+            },
+            {
+              "claim": "Impacted payers must publicly report specified metrics annually.",
+              "retained": false
+            },
+            {
+              "claim": "The initial metrics are due March 31, 2026.",
+              "retained": false
+            }
+          ],
+          "statements": [
+            {
+              "text": "Provider Notice, Including Denial Reason: Beginning in 2026, impacted payers must provide a specific reason for denied prior authorization decisions, regardless of the method used to send the prior authorization request.",
+              "fully_supported": true
+            }
+          ],
+          "citations": [
+            {
+              "statement_index": 0,
+              "citation_index": 0,
+              "citation_id": "a3893de21b2a5d2c",
+              "source": "cms_prior_authorization_fact_sheet.pdf",
+              "page": 3,
+              "evidence_excerpt": "Provider Notice, Including Denial Reason: Beginning in 2026, impacted payers must provide a \nspecific reason for denied prior authorization decisions, regardless of the method used to send the \nprior authorization request.",
+              "contributes_support": true
+            }
+          ],
+          "notes": "The answer retained only the 2026 specific-denial-reason requirement; the other four required claims were omitted."
+        }
+      }
+    },
+    {
+      "id": "policy-008",
+      "question": "Where should Medicare FFS, DMEPOS, and Medicare Advantage claims be submitted?",
+      "category": "multi_statement",
+      "reference": {
+        "expected_answerable": true,
+        "reference_answer": "For Medicare fee-for-service patients, submit claims to the Medicare Administrative Contractor for the state where the services were provided. DMEPOS suppliers submit to the DME MAC for the state where the patient lives. For Medicare Advantage patients, submit claims to the patient's Medicare Advantage plan.",
+        "required_claims": [
+          "Medicare FFS claims go to the MAC for the state where services were provided.",
+          "DMEPOS claims go to the DME MAC for the state where the patient lives.",
+          "Medicare Advantage claims go to the patient's MA plan."
+        ],
+        "gold_evidence": [
+          {
+            "source": "mln006976_medicare_billing_cms_1500_837p.pdf",
+            "page": 9,
+            "excerpt": "Medicare FFS: For patients enrolled in Medicare FFS, submit claims to the MAC for the state where you provided the services. DMEPOS suppliers submit claims to the DME MAC for the state where the patient lives."
+          },
+          {
+            "source": "mln006976_medicare_billing_cms_1500_837p.pdf",
+            "page": 9,
+            "excerpt": "Medicare Advantage (MA): For patients enrolled in an MA plan, submit claims to the patient's MA plan."
+          }
+        ],
+        "notes": "The source page is stored as zero-based page 9 (display page 10). All three destinations are required for a complete answer."
+      },
+      "baseline": {
+        "status": "complete",
+        "output": {
+          "answer": "Medicare FFS claims should be submitted to the MAC for the state where services were provided [S1]. \nDMEPOS suppliers submit claims to the DME MAC for the state where the patient lives. \nFind your MAC's website. \nMedicare Advantage (MA) plans require submitting claims to the patient's MA plan, but not directly to Medicare. \nYou can't charge patients for completing or filing a claim; violating this rule results in penalties [S2].",
+          "sources": [
+            "medicare_timely_filing_mln.pdf (page 4)",
+            "mln006976_medicare_billing_cms_1500_837p.pdf (page 10)"
+          ],
+          "confidence": 0.82,
+          "normalized_query": "where should medicare ffs, dmepos, and medicare advantage claims be submitted?",
+          "latency_ms": 4026.806041947566
+        },
+        "human_labels": {
+          "required_claims": [
+            {
+              "claim": "Medicare FFS claims go to the MAC for the state where services were provided.",
+              "retained": true
+            },
+            {
+              "claim": "DMEPOS claims go to the DME MAC for the state where the patient lives.",
+              "retained": true
+            },
+            {
+              "claim": "Medicare Advantage claims go to the patient's MA plan.",
+              "retained": true
+            }
+          ],
+          "statements": [
+            {
+              "text": "Medicare FFS claims should be submitted to the MAC for the state where services were provided.",
+              "fully_supported": true
+            },
+            {
+              "text": "DMEPOS suppliers submit claims to the DME MAC for the state where the patient lives.",
+              "fully_supported": true
+            },
+            {
+              "text": "Medicare Advantage (MA) plans require submitting claims to the patient's MA plan, but not directly to Medicare.",
+              "fully_supported": true
+            },
+            {
+              "text": "You can't charge patients for completing or filing a claim; violating this rule results in penalties.",
+              "fully_supported": true
+            }
+          ],
+          "citations": [
+            {
+              "statement_index": 0,
+              "citation_index": 0,
+              "source": "medicare_timely_filing_mln.pdf (page 4)",
+              "contributes_support": false
+            },
+            {
+              "statement_index": 0,
+              "citation_index": 1,
+              "source": "mln006976_medicare_billing_cms_1500_837p.pdf (page 10)",
+              "contributes_support": true
+            },
+            {
+              "statement_index": 1,
+              "citation_index": 0,
+              "source": "medicare_timely_filing_mln.pdf (page 4)",
+              "contributes_support": false
+            },
+            {
+              "statement_index": 1,
+              "citation_index": 1,
+              "source": "mln006976_medicare_billing_cms_1500_837p.pdf (page 10)",
+              "contributes_support": true
+            },
+            {
+              "statement_index": 2,
+              "citation_index": 0,
+              "source": "medicare_timely_filing_mln.pdf (page 4)",
+              "contributes_support": false
+            },
+            {
+              "statement_index": 2,
+              "citation_index": 1,
+              "source": "mln006976_medicare_billing_cms_1500_837p.pdf (page 10)",
+              "contributes_support": true
+            },
+            {
+              "statement_index": 3,
+              "citation_index": 0,
+              "source": "medicare_timely_filing_mln.pdf (page 4)",
+              "contributes_support": false
+            },
+            {
+              "statement_index": 3,
+              "citation_index": 1,
+              "source": "mln006976_medicare_billing_cms_1500_837p.pdf (page 10)",
+              "contributes_support": true
+            }
+          ],
+          "notes": "Independently checked against the reference and corpus evidence."
+        }
+      },
+      "policycite_rag": {
+        "status": "complete",
+        "output": {
+          "question": "Where should Medicare FFS, DMEPOS, and Medicare Advantage claims be submitted?",
+          "answer": "Medicare FFS claims should be submitted to the MAC for the state where services were provided [S1]. \nDMEPOS suppliers submit claims to the DME MAC for the state where the patient lives. \nFind your MAC's website. \nMedicare Advantage (MA) plans require submitting claims to the patient's MA plan, but not directly to Medicare. \nYou can't charge patients for completing or filing a claim; violating this rule results in penalties [S2].",
+          "baseline_sources": [
+            "medicare_timely_filing_mln.pdf (page 4)",
+            "mln006976_medicare_billing_cms_1500_837p.pdf (page 10)"
+          ],
+          "generation_context_ids": [
+            "df8bcad4fc24cafd",
+            "d5b05447810f4f76",
+            "f9d45a0c8066342f",
+            "3f6824c26ab27f3b",
+            "10bcce2aea19e057",
+            "c67c1c39fc1615c7",
+            "58d213f047ca2e1a",
+            "a6cf6315d12a4f43"
+          ],
+          "statements": [
+            {
+              "text": "Medicare FFS claims should be submitted to the MAC for the state where services were provided.",
+              "verdict": "SUPPORTED",
+              "citations": [
+                {
+                  "citation_id": "df8bcad4fc24cafd",
+                  "source": "mln006976_medicare_billing_cms_1500_837p.pdf",
+                  "page": 10,
+                  "evidence_excerpt": "MLN BookletMedicare Billing: CMS-1500 & 837P\nMLN006976 December 2025Page 10 of 11\nWhere to Submit Claims\nMedicare FFS: For patients enrolled in Medicare FFS, submit claims to the MAC for the state where \nyou provided the services.",
+                  "retrieval_score": 0.03278688524590164,
+                  "context_type": "post_generation"
+                }
+              ],
+              "reason": "Near-verbatim support found in the retrieved passage."
+            },
+            {
+              "text": "DMEPOS suppliers submit claims to the DME MAC for the state where the patient lives.",
+              "verdict": "SUPPORTED",
+              "citations": [
+                {
+                  "citation_id": "df8bcad4fc24cafd",
+                  "source": "mln006976_medicare_billing_cms_1500_837p.pdf",
+                  "page": 10,
+                  "evidence_excerpt": "DMEPOS suppliers submit claims to the DME MAC for the state where the \npatient lives.",
+                  "retrieval_score": 0.03278688524590164,
+                  "context_type": "post_generation"
+                }
+              ],
+              "reason": "Near-verbatim support found in the retrieved passage."
+            },
+            {
+              "text": "Medicare Advantage (MA) plans require submitting claims to the patient's MA plan, but not directly to Medicare.",
+              "verdict": "NOT_SUPPORTED",
+              "citations": [],
+              "reason": null
+            },
+            {
+              "text": "You can't charge patients for completing or filing a claim; violating this rule results in penalties.",
+              "verdict": "NOT_SUPPORTED",
+              "citations": [],
+              "reason": null
+            }
+          ],
+          "citation_coverage": 0.5,
+          "needs_human_review": true,
+          "latency_ms": 39972.7324169362
+        },
+        "human_labels": {
+          "required_claims": [
+            {
+              "claim": "Medicare FFS claims go to the MAC for the state where services were provided.",
+              "retained": true
+            },
+            {
+              "claim": "DMEPOS claims go to the DME MAC for the state where the patient lives.",
+              "retained": true
+            },
+            {
+              "claim": "Medicare Advantage claims go to the patient's MA plan.",
+              "retained": true
+            }
+          ],
+          "statements": [
+            {
+              "text": "Medicare FFS claims should be submitted to the MAC for the state where services were provided.",
+              "fully_supported": true
+            },
+            {
+              "text": "DMEPOS suppliers submit claims to the DME MAC for the state where the patient lives.",
+              "fully_supported": true
+            },
+            {
+              "text": "Medicare Advantage (MA) plans require submitting claims to the patient's MA plan, but not directly to Medicare.",
+              "fully_supported": true
+            },
+            {
+              "text": "You can't charge patients for completing or filing a claim; violating this rule results in penalties.",
+              "fully_supported": true
+            }
+          ],
+          "citations": [
+            {
+              "statement_index": 0,
+              "citation_index": 0,
+              "citation_id": "df8bcad4fc24cafd",
+              "source": "mln006976_medicare_billing_cms_1500_837p.pdf",
+              "page": 10,
+              "evidence_excerpt": "MLN BookletMedicare Billing: CMS-1500 & 837P\nMLN006976 December 2025Page 10 of 11\nWhere to Submit Claims\nMedicare FFS: For patients enrolled in Medicare FFS, submit claims to the MAC for the state where \nyou provided the services.",
+              "contributes_support": true
+            },
+            {
+              "statement_index": 1,
+              "citation_index": 0,
+              "citation_id": "df8bcad4fc24cafd",
+              "source": "mln006976_medicare_billing_cms_1500_837p.pdf",
+              "page": 10,
+              "evidence_excerpt": "DMEPOS suppliers submit claims to the DME MAC for the state where the \npatient lives.",
+              "contributes_support": true
+            }
+          ],
+          "notes": "Independently checked against the reference and corpus evidence."
+        }
+      }
+    },
+    {
+      "id": "policy-009",
+      "question": "What is the deadline for appealing a denied prior authorization request?",
+      "category": "unsupported_premise",
+      "reference": {
+        "expected_answerable": false,
+        "reference_answer": "The loaded policy corpus does not specify a deadline for appealing a denied prior authorization request.",
+        "required_claims": [
+          "The corpus does not provide a prior authorization appeal deadline."
+        ],
+        "gold_evidence": [],
+        "notes": "Negative control. The seven-calendar-day passage is the deadline for a standard prior authorization decision, not an appeal deadline. A specific appeal deadline must be labeled unsupported."
+      },
+      "baseline": {
+        "status": "complete",
+        "output": {
+          "answer": "Not found in documents.",
+          "sources": [],
+          "confidence": 0.4,
+          "normalized_query": "what is the deadline for appealing a denied prior authorization request?",
+          "latency_ms": 96.23645799001679
+        },
+        "human_labels": {
+          "required_claims": [
+            {
+              "claim": "The corpus does not provide a prior authorization appeal deadline.",
+              "retained": true
+            }
+          ],
+          "statements": [],
+          "citations": [],
+          "notes": "Negative control correctly abstained with 'Not found in documents.'"
+        }
+      },
+      "policycite_rag": {
+        "status": "complete",
+        "output": {
+          "question": "What is the deadline for appealing a denied prior authorization request?",
+          "answer": "Not found in documents.",
+          "baseline_sources": [],
+          "generation_context_ids": [
+            "a3893de21b2a5d2c",
+            "fcd7d7ffeac21672",
+            "8653f9767c077bb3",
+            "3f6824c26ab27f3b",
+            "258eee3e7010613e",
+            "54d3c5ef813f7124",
+            "d95702bf9d80b6b8",
+            "0d2a18ddd31dc384"
+          ],
+          "statements": [],
+          "citation_coverage": 0.0,
+          "needs_human_review": false,
+          "latency_ms": 96.24883299693465
+        },
+        "human_labels": {
+          "required_claims": [
+            {
+              "claim": "The corpus does not provide a prior authorization appeal deadline.",
+              "retained": true
+            }
+          ],
+          "statements": [],
+          "citations": [],
+          "notes": "Negative control correctly abstained with 'Not found in documents.'"
+        }
+      }
+    },
+    {
+      "id": "policy-010",
+      "question": "Are emergency services categorically exempt from prior authorization under the CMS rule?",
+      "category": "unsupported_premise",
+      "reference": {
+        "expected_answerable": false,
+        "reference_answer": "The loaded policy corpus does not establish that emergency services are categorically exempt from prior authorization under the CMS rule.",
+        "required_claims": [
+          "The corpus does not establish a categorical emergency-services exemption from prior authorization."
+        ],
+        "gold_evidence": [],
+        "notes": "Negative control. The corpus discusses expedited urgent requests and separately discusses emergency services in a timely-filing document; neither passage supports a categorical prior-authorization exemption."
+      },
+      "baseline": {
+        "status": "complete",
+        "output": {
+          "answer": "Not found in documents.",
+          "sources": [],
+          "confidence": 0.4,
+          "normalized_query": "are emergency services categorically exempt from prior authorization under the cms rule?",
+          "latency_ms": 36.94874997017905
+        },
+        "human_labels": {
+          "required_claims": [
+            {
+              "claim": "The corpus does not establish a categorical emergency-services exemption from prior authorization.",
+              "retained": true
+            }
+          ],
+          "statements": [],
+          "citations": [],
+          "notes": "Negative control correctly abstained with 'Not found in documents.'"
+        }
+      },
+      "policycite_rag": {
+        "status": "complete",
+        "output": {
+          "question": "Are emergency services categorically exempt from prior authorization under the CMS rule?",
+          "answer": "Not found in documents.",
+          "baseline_sources": [],
+          "generation_context_ids": [
+            "3f6824c26ab27f3b",
+            "fcd7d7ffeac21672",
+            "258eee3e7010613e",
+            "a3893de21b2a5d2c",
+            "54d3c5ef813f7124",
+            "52a65200765d622c",
+            "8653f9767c077bb3",
+            "d95702bf9d80b6b8"
+          ],
+          "statements": [],
+          "citation_coverage": 0.0,
+          "needs_human_review": false,
+          "latency_ms": 36.952082940842956
+        },
+        "human_labels": {
+          "required_claims": [
+            {
+              "claim": "The corpus does not establish a categorical emergency-services exemption from prior authorization.",
+              "retained": true
+            }
+          ],
+          "statements": [],
+          "citations": [],
+          "notes": "Negative control correctly abstained with 'Not found in documents.'"
+        }
+      }
+    }
+  ],
+  "labeling": {
+    "method": "manual independent review against reference answers, required claims, and corpus evidence",
+    "automated_verdicts_used_as_labels": false,
+    "labeler": "Codex-assisted human-style review",
+    "invalidated_reason": "Three statements without attached supporting citations were incorrectly labeled fully_supported=true. Preserved for audit history; do not report these aggregate metrics."
+  },
+  "scored_at": "2026-07-01T22:37:06.764730+00:00"
+}

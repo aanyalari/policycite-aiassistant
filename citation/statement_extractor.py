@@ -26,7 +26,7 @@ _PREDICATE_RE = re.compile(
     r"applies?|applied|allows?|allowed|reduces?|reduced|amends?|amended|"
     r"provides?|provided|specifies?|specified|mandates?|mandated|uses?|"
     r"used|files?|filed|submits?|submitted|denies?|denied|includes?|"
-    r"included|excludes?|excluded|found|associated)\b",
+    r"included|excludes?|excluded|found|associated|reports?|reported)\b",
     re.IGNORECASE,
 )
 
@@ -97,6 +97,8 @@ def _is_factual_candidate(text: str) -> bool:
     if text.endswith(":"):
         return False
     if len(text.split()) < 4:
+        return False
+    if not _PREDICATE_RE.search(text):
         return False
     if _REFERENCE_FRAGMENT_RE.match(text) and not _PREDICATE_RE.search(text):
         return False

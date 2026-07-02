@@ -86,7 +86,7 @@ class AttributionTests(unittest.TestCase):
 
     def test_invented_candidate_id_is_rejected(self):
         result = judge_attribution(
-            "Medicare claims must be filed within 12 months.",
+            "The filing deadline is one year.",
             [_doc()],
             llm=_LLM(
                 {
@@ -99,6 +99,40 @@ class AttributionTests(unittest.TestCase):
 
         self.assertEqual(result.verdict, AttributionVerdict.NOT_SUPPORTED)
         self.assertEqual(result.citations, [])
+
+    def test_near_verbatim_support_recovers_model_false_negative(self):
+        result = judge_attribution(
+            "Medicare claims must be filed no later than 12 months after the date of service.",
+            [_doc()],
+            llm=_LLM(
+                {
+                    "verdict": "NOT_SUPPORTED",
+                    "citation_ids": [],
+                    "reason": "Model missed the passage.",
+                }
+            ),
+        )
+
+        self.assertEqual(result.verdict, AttributionVerdict.SUPPORTED)
+        self.assertEqual(len(result.citations), 1)
+
+    def test_supported_result_keeps_only_strongest_citation(self):
+        weaker = _doc("candidate-2", page=5)
+        weaker.page_content = "Medicare provides health coverage information."
+        result = judge_attribution(
+            "Medicare claims have a 12 month requirement.",
+            [_doc(), weaker],
+            llm=_LLM(
+                {
+                    "verdict": "SUPPORTED",
+                    "citation_ids": ["candidate-2", "candidate-1"],
+                    "reason": "Supported.",
+                }
+            ),
+        )
+
+        self.assertEqual(len(result.citations), 1)
+        self.assertEqual(result.citations[0].citation_id, "candidate-1")
 
     def test_excerpt_is_copied_from_passage_not_generated_by_model(self):
         result = judge_attribution(

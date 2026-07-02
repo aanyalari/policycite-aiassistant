@@ -7,6 +7,7 @@ from ui_helpers import (
     evidence_location,
     format_coverage,
     format_latency,
+    statement_support_summary,
 )
 
 
@@ -24,6 +25,19 @@ class UIHelperTests(unittest.TestCase):
             "policy.pdf — page 7",
         )
         self.assertEqual(evidence_location({}), "Unknown document")
+
+    def test_summarizes_supported_statements(self):
+        self.assertEqual(
+            statement_support_summary(
+                [
+                    {"verdict": "SUPPORTED"},
+                    {"verdict": "NOT_SUPPORTED"},
+                    {"verdict": "SUPPORTED"},
+                ]
+            ),
+            "2 of 3",
+        )
+        self.assertEqual(statement_support_summary(None), "0 of 0")
 
     def test_translates_request_errors(self):
         self.assertIn("too long", api_error_message(requests.exceptions.Timeout()))

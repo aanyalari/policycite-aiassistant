@@ -23,6 +23,18 @@ def format_latency(value: Any) -> str:
     return f"{max(latency, 0.0):,.0f} ms"
 
 
+def statement_support_summary(statements: Any) -> str:
+    """Return an explicit supported-statement count for a PolicyCite audit."""
+    if not isinstance(statements, list):
+        return "0 of 0"
+    supported = sum(
+        item.get("verdict") == "SUPPORTED"
+        for item in statements
+        if isinstance(item, Mapping)
+    )
+    return f"{supported} of {len(statements)}"
+
+
 def evidence_location(citation: Mapping[str, Any]) -> str:
     """Build a compact source label from public citation fields."""
     source = str(citation.get("source") or "Unknown document")

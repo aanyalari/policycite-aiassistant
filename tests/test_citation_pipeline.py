@@ -69,7 +69,7 @@ class CitationPipelineTests(unittest.TestCase):
         extract.assert_called_once_with(rag.trace.answer, llm=llm)
         self.assertEqual(retrieve.call_count, 2)
         for call in retrieve.call_args_list:
-            self.assertEqual(call.kwargs["top_k"], 3)
+            self.assertEqual(call.kwargs["top_k"], 5)
             self.assertEqual(
                 call.kwargs["generation_context_ids"], ["generation-1"]
             )

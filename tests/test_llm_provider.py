@@ -12,12 +12,18 @@ class LLMProviderTests(unittest.TestCase):
             patch.object(llm_provider, "OLLAMA_CHAT_MODEL", "llama3.2:1b"),
             patch.object(llm_provider, "ATTRIBUTION_PROVIDER", "ollama"),
             patch.object(llm_provider, "ATTRIBUTION_MODEL", "qwen2.5:3b"),
+            patch.object(llm_provider, "OLLAMA_REQUEST_TIMEOUT", 42.0),
+            patch.object(llm_provider, "OLLAMA_NUM_PREDICT", 123),
         ):
             llm_provider.get_chat_llm()
             llm_provider.get_attribution_llm()
 
         self.assertEqual(chat.call_args_list[0].kwargs["model"], "llama3.2:1b")
         self.assertEqual(chat.call_args_list[1].kwargs["model"], "qwen2.5:3b")
+        self.assertEqual(chat.call_args_list[0].kwargs["client_kwargs"]["timeout"], 42.0)
+        self.assertEqual(chat.call_args_list[1].kwargs["client_kwargs"]["timeout"], 42.0)
+        self.assertEqual(chat.call_args_list[0].kwargs["num_predict"], 123)
+        self.assertEqual(chat.call_args_list[1].kwargs["num_predict"], 123)
 
     def test_unknown_attribution_provider_is_rejected(self):
         with patch.object(llm_provider, "ATTRIBUTION_PROVIDER", "unknown"):

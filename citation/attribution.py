@@ -15,6 +15,13 @@ from .schemas import (
 )
 
 
+_LEXICAL_STOPWORDS = {
+    "a", "an", "and", "are", "as", "at", "be", "by", "for", "from",
+    "in", "is", "it", "of", "on", "or", "that", "the", "their", "this",
+    "to", "was", "were", "with", "according", "provided", "sources",
+}
+
+
 class _AttributionDecision(BaseModel):
     verdict: AttributionVerdict
     citation_ids: List[str] = Field(default_factory=list)
@@ -77,6 +84,39 @@ def _best_exact_excerpt(statement: str, passage: str) -> str:
     )
 
 
+def _content_tokens(text: str) -> set[str]:
+    return {
+        token for token in re.findall(r"[a-z0-9]+", text.lower())
+        if token not in _LEXICAL_STOPWORDS
+    }
+
+
+def _support_score(statement: str, passage: str) -> float:
+    statement_tokens = _content_tokens(statement)
+    if not statement_tokens:
+        return 0.0
+    passage_tokens = _content_tokens(passage)
+    statement_numbers = set(re.findall(r"\b\d+(?:\.\d+)?\b", statement))
+    passage_numbers = set(re.findall(r"\b\d+(?:\.\d+)?\b", passage))
+    if not statement_numbers.issubset(passage_numbers):
+        return 0.0
+    return len(statement_tokens & passage_tokens) / len(statement_tokens)
+
+
+def _citation_from_doc(statement: str, doc: Document) -> EvidenceCitation:
+    metadata = doc.metadata
+    internal_page = metadata.get("page")
+    display_page = internal_page + 1 if isinstance(internal_page, int) else None
+    source = metadata.get("source_file") or metadata.get("source") or ""
+    return EvidenceCitation(
+        citation_id=_candidate_id(doc),
+        source=str(source),
+        page=display_page,
+        evidence_excerpt=_best_exact_excerpt(statement, doc.page_content),
+        retrieval_score=metadata.get("retrieval_score"),
+    )
+
+
 def judge_attribution(
     statement: str,
     evidence_docs: List[Document],
@@ -94,6 +134,18 @@ def judge_attribution(
     if not usable_docs:
         return _not_supported(text, "No usable evidence was retrieved.")
 
+    best_lexical_doc = max(
+        usable_docs, key=lambda doc: _support_score(text, doc.page_content)
+    )
+    best_lexical_score = _support_score(text, best_lexical_doc.page_content)
+    if best_lexical_score >= 0.82:
+        return CitedStatement(
+            text=text,
+            verdict=AttributionVerdict.SUPPORTED,
+            citations=[_citation_from_doc(text, best_lexical_doc)],
+            reason="Near-verbatim support found in the retrieved passage.",
+        )
+
     judge = llm or get_attribution_llm()
     try:
         structured_judge = judge.with_structured_output(_AttributionDecision)
@@ -109,27 +161,22 @@ def judge_attribution(
         return _not_supported(text, f"Attribution judge failed: {exc}")
 
     docs_by_id = {_candidate_id(doc): doc for doc in usable_docs}
-    citations = []
-    seen = set()
+    candidate_docs = []
     for candidate_id in decision.citation_ids:
         doc = docs_by_id.get(candidate_id)
-        if doc is None or candidate_id in seen:
+        if doc is None or doc in candidate_docs:
             continue
-        seen.add(candidate_id)
-        excerpt = _best_exact_excerpt(text, doc.page_content)
-        metadata = doc.metadata
-        internal_page = metadata.get("page")
-        display_page = internal_page + 1 if isinstance(internal_page, int) else None
-        source = metadata.get("source_file") or metadata.get("source") or ""
-        citations.append(
-            EvidenceCitation(
-                citation_id=candidate_id,
-                source=str(source),
-                page=display_page,
-                evidence_excerpt=excerpt,
-                retrieval_score=metadata.get("retrieval_score"),
-            )
+        candidate_docs.append(doc)
+
+    # A single strongest passage is easier to audit and avoids attaching broad,
+    # merely related passages alongside the actual support.
+    citations = []
+    if candidate_docs:
+        best_doc = max(
+            candidate_docs,
+            key=lambda doc: _support_score(text, doc.page_content),
         )
+        citations = [_citation_from_doc(text, best_doc)]
 
     if decision.verdict == AttributionVerdict.SUPPORTED and not citations:
         return _not_supported(

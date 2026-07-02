@@ -14,10 +14,11 @@ def answer_with_citations(
     question: str,
     rag: MedicalRAG,
     llm=None,
+    answer_trace=None,
 ) -> CitationTrace:
     """Generate an answer and attach statement-level citation assurance."""
     started_at = perf_counter()
-    answer_trace = rag.answer_with_trace(question)
+    answer_trace = answer_trace or rag.answer_with_trace(question)
     generation_context_ids = [
         doc_key(doc) for doc in answer_trace.retrieved_docs
     ]
@@ -28,7 +29,7 @@ def answer_with_citations(
         evidence_docs = retrieve_statement_evidence(
             statement,
             rag,
-            top_k=3,
+            top_k=5,
             generation_context_ids=generation_context_ids,
         )
         cited_statements.append(

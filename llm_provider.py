@@ -11,6 +11,8 @@ OLLAMA_EMBED_MODEL = os.getenv("OLLAMA_EMBED_MODEL", "nomic-embed-text")
 OPENAI_MODEL = os.getenv("OPENAI_MODEL", "gpt-4o-mini")
 ATTRIBUTION_PROVIDER = os.getenv("ATTRIBUTION_PROVIDER", "ollama").lower()
 ATTRIBUTION_MODEL = os.getenv("ATTRIBUTION_MODEL", "qwen2.5:3b")
+OLLAMA_REQUEST_TIMEOUT = float(os.getenv("OLLAMA_REQUEST_TIMEOUT", "180"))
+OLLAMA_NUM_PREDICT = int(os.getenv("OLLAMA_NUM_PREDICT", "256"))
 
 
 def get_embeddings():
@@ -36,6 +38,8 @@ def get_chat_llm(temperature: float = 0):
         model=OLLAMA_CHAT_MODEL,
         base_url=OLLAMA_BASE_URL,
         temperature=temperature,
+        num_predict=OLLAMA_NUM_PREDICT,
+        client_kwargs={"timeout": OLLAMA_REQUEST_TIMEOUT},
     )
 
 
@@ -57,4 +61,6 @@ def get_attribution_llm(temperature: float = 0):
         model=ATTRIBUTION_MODEL,
         base_url=OLLAMA_BASE_URL,
         temperature=temperature,
+        num_predict=OLLAMA_NUM_PREDICT,
+        client_kwargs={"timeout": OLLAMA_REQUEST_TIMEOUT},
     )

@@ -201,6 +201,18 @@ Note: The provided sources do not mention a specific requirement.
         self.assertEqual(extract_statements("Hello! Please ask a question."), [])
         self.assertEqual(extract_statements(""), [])
 
+    def test_heading_and_metadata_fragments_are_not_statements(self):
+        answer = (
+            "To assess Patient Access API usage,\n"
+            "2140, Issued: 01-21-11, Effective: 01-01-10.\n"
+            "Impacted payers must report metrics annually."
+        )
+
+        self.assertEqual(
+            extract_statements(answer),
+            ["Impacted payers must report metrics annually."],
+        )
+
     def test_therefore_conclusion_is_cleaned_and_kept_for_attribution(self):
         answer = (
             "Therefore, the correct answer is: The Medicare timely filing "
