@@ -31,6 +31,8 @@ evaluation/results/20260701T223314Z-invalid-labeling.json
 evaluation/results/20260701T232956Z-pre-cleanup-unscored.json
 evaluation/baseline_notes.md
 evaluation/apply_provisional_labels_20260702.py
-submission/POWERPOINT_CONTENT.md
-submission/SUBMISSION_CHECKLIST.md
-submission/VIDEO_RECORDING_GUIDE.md
+deliverables/POWERPOINT_CONTENT.md
+deliverables/PolicyCite_RAG_Report_Aanya_Lari_original.docx
+deliverables/SUBMISSION_CHECKLIST.md
+deliverables/VIDEO_RECORDING_GUIDE.md
+deliverables/build_policycite_report.py

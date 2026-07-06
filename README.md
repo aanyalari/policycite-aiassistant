@@ -9,6 +9,11 @@ assessment topic on content management in health care.
 > coverage, or reimbursement advice. Consequential use requires qualified
 > human review.
 
+## Deliverables
+
+- [Written report](./deliverables/AanyaLari_PolicyCite_Report.docx)
+- [Presentation slides](./deliverables/AanyaLari_PolicyCite_PPT.pdf)
+
 ## What it does
 
 A response-level source list does not show which page supports each factual
@@ -186,7 +191,7 @@ data/                     policy corpus
 evaluation/               frozen questions, labeling guide, runner, results
 policy_pdfs/              public CMS source documents
 policy_vector_db/         prebuilt local FAISS index
-submission/               assessment report and reproducible report builder
+deliverables/             final assessment report and presentation PDF
 tests/                    unit and regression tests
 api.py                    FastAPI endpoints
 app.py                    Streamlit evidence interface
