@@ -16,7 +16,7 @@ except Exception:
 
 load_dotenv()
 
-PDF_FOLDER = os.getenv("PDF_FOLDER", "medical_pdfs")
+PDF_FOLDER = os.getenv("PDF_FOLDER", "policy_pdfs")
 VECTOR_DB = os.getenv("VECTOR_DB", "vector_db")
 CORPUS_PATH = os.getenv("CORPUS_PATH", "data/corpus.jsonl")
 

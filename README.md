@@ -186,10 +186,9 @@ data/                     policy corpus
 evaluation/               frozen questions, labeling guide, runner, results
 policy_pdfs/              public CMS source documents
 policy_vector_db/         prebuilt local FAISS index
-submission/               report, slides, and video preparation material
+submission/               assessment report and reproducible report builder
 tests/                    unit and regression tests
 api.py                    FastAPI endpoints
 app.py                    Streamlit evidence interface
 rag_core.py               inherited RAG plus focused policy behavior
 ```
-
