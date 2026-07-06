@@ -77,6 +77,15 @@ Generate Verifiable Text for Medicine?* PolicyCite-RAG adapts the paper's
 statement-level evaluation and post-generation retrieval ideas to public CMS
 payment-policy documents.
 
+## Baseline attribution and license
+
+This project builds on
+[mshoaib2006/medical-rag-ai-assistant](https://github.com/mshoaib2006/medical-rag-ai-assistant),
+distributed under the MIT License. The inherited baseline includes ingestion,
+hybrid retrieval, answer generation, FastAPI, Streamlit, and response-level
+sources. PolicyCite's new contribution is the citation-assurance and evaluation
+layer described above.
+
 ## Quick start
 
 ### Requirements
