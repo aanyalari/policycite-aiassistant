@@ -14,7 +14,7 @@ assessment topic on content management in health care.
 - [Written report](./deliverables/AanyaLari_PolicyCite_Report.docx)
 - [Presentation slides](./deliverables/AanyaLari_PolicyCite_PPT.pptx)
 - [Demo video](./deliverables/AanyaLari_PolicyCite_Presentation.mp4)
-    (Google Drive link: https://drive.google.com/file/d/1EcwaX9xrAN7eRQlkvSeSwGpWhY2Tmt-k/view?usp=sharing)
+    (Google Drive link: https://drive.google.com/file/d/1tute4VydX4Vsa9iM0W4u3xsbf5UZFh-a/view?usp=sharing)
 
 ## What it does
 
