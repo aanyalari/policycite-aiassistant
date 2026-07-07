@@ -12,7 +12,7 @@ assessment topic on content management in health care.
 ## Deliverables
 
 - [Written report](./deliverables/AanyaLari_PolicyCite_Report.docx)
-- [Presentation slides](./deliverables/AanyaLari_PolicyCite_PPT.pdf)
+- [Presentation slides](./deliverables/AanyaLari_PolicyCite_PPT.pptx)
 
 ## What it does
 
@@ -191,7 +191,7 @@ data/                     policy corpus
 evaluation/               frozen questions, labeling guide, runner, results
 policy_pdfs/              public CMS source documents
 policy_vector_db/         prebuilt local FAISS index
-deliverables/             final assessment report and presentation PDF
+deliverables/             final assessment report and editable presentation deck
 tests/                    unit and regression tests
 api.py                    FastAPI endpoints
 app.py                    Streamlit evidence interface
