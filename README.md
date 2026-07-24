@@ -2,6 +2,8 @@
 
 PolicyCite-RAG is a healthcare payment-policy assistant that adds
 statement-level evidence checks to a retrieval-augmented generation baseline.
+The project is built as a small, inspectable prototype for Cotiviti's
+assessment topic on content management in health care.
 
 > Research prototype only. It does not provide medical, legal, coding,
 > coverage, or reimbursement advice. Consequential use requires qualified
@@ -25,6 +27,10 @@ sources, then separately:
 3. judges complete support using a separately configured attribution model;
 4. attaches validated document, page, and excerpt evidence; and
 5. flags unsupported statements for review.
+
+The project addresses Cotiviti's assessment topic **Content Management in
+Health Care**, especially billing and payment policy, traceability, and review
+controls for generated content.
 
 ## Features
 
